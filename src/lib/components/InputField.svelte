@@ -39,6 +39,7 @@
     --contentHeight: 1.3em;
     display: flex;
     position: relative;
+    min-width: 0;
     transition: border 250ms;
   }
 

@@ -1,4 +1,4 @@
-@import "@fontsource/cormorant-upright";
+@import "@fontsource/cormorant-upright/400.css";
 
 :root {
   --red: #f44336;
@@ -24,9 +24,25 @@
 
 body {
   font-family: "Cormorant Upright", serif;
+  // Enlever l'arrière-plan bleu lors d'un clic sur un bouton sur mobiles :
+  // https://stackoverflow.com/questions/45049873/how-to-remove-the-blue-background-of-button-on-mobile
+  -webkit-tap-highlight-color: transparent;
+  // Cette propriété permet de rendre le scrolling doux lors du clic sur un lien faisant référence à une autre endroit dans la page grâce à un id
+  scroll-behavior: smooth;
 }
 
 svg {
   font-size: 1.4em;
   display: block;
 }
+
+a {
+  color: #0000ee;
+  overflow-wrap: break-word;
+}
+
+.pageTitle {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+

@@ -1,7 +1,7 @@
 <script lang="ts">
   import Ripple from "./Ripple.svelte";
 
-  export let variant: "elevated" | "flat" | "outlined" | "text" = "elevated";
+  export let variant: "filled" | "elevated" | "flat" | "outlined" | "text" = "filled";
   export let disabled = false;
   export let size: "small" | "medium" | "large" = "medium";
   export let block = false;
@@ -95,6 +95,17 @@
     display: flex;
   }
 
+  .filled:hover {
+    box-shadow:
+      0 3px 1px -2px rgb(0 0 0 / 0.2),
+      0 2px 2px 0 rgb(0 0 0 / 0.14),
+      0 1px 5px 0 rgb(0 0 0 / 0.12);
+  }
+
+  .filled:active {
+    box-shadow: none;
+  }
+
   .elevated {
     box-shadow:
       0 3px 1px -2px rgb(0 0 0 / 0.2),
@@ -111,9 +122,9 @@
 
   .elevated:active {
     box-shadow:
-      0 3px 3px -3px rgba(0 0 0 / 0.2),
-      0 5px 6px 1px rgba(0 0 0 / 0.14),
-      0 2px 7px 2px rgba(0 0 0 / 0.12);
+      0 0px 1px -1px rgba(0 0 0 / 0.2),
+      0 2px 2px rgba(0 0 0 / 0.14),
+      0 1px 3px rgba(0 0 0 / 0.12);
   }
 
   .outlined,
@@ -150,6 +161,8 @@
     padding: 0;
     min-width: initial;
     border-radius: 50%;
+    /* In case it is placed in a flex container */
+    flex-shrink: 0;
   }
 
   .icon.small {

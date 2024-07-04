@@ -6,7 +6,6 @@
   import InputField from "./InputField.svelte";
   import { slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
-    import {tick} from "svelte";
 
   export let type: "text" | "email" | "password" | "date" | "url" = "text";
   export let value = "";
@@ -56,29 +55,24 @@
     if (state === "default" || state === "valid") message = "";
   };
 
-  const setMsg = async (msg: string) => {
-      message = "";
-      await tick();
-      message = msg;
-  };
-
-  const handleInput: FormEventHandler<HTMLInputElement> = async (event) => {
+  const handleInput: FormEventHandler<HTMLInputElement> = (event) => {
     const input = event.currentTarget;
     value = input.value;
 
     if (input.validity.valid && !(value.length > maxlength)) {
-      await setMsg("valid");
+      state = "valid";
+      message = hint;
       return;
     }
 
     if (input.validity.valueMissing) {
-      await setMsg(ERRORS.VALUE_MISSING);
+      message = ERRORS.VALUE_MISSING;
       state = "required";
       return;
-    } else if (input.validity.tooShort) await setMsg(ERRORS.TOO_SHORT);
-    else if (value.length > maxlength) await setMsg(ERRORS.TOO_LONG);
-    else if (input.validity.typeMismatch) await setMsg(ERRORS.TYPE_MISMATCH);
-    else if (input.validity.patternMismatch) await setMsg(ERRORS.PATTERN_MISMATCH);
+    } else if (input.validity.tooShort) message = ERRORS.TOO_SHORT;
+    else if (value.length > maxlength) message = ERRORS.TOO_LONG;
+    else if (input.validity.typeMismatch) message = ERRORS.TYPE_MISMATCH;
+    else if (input.validity.patternMismatch) message = ERRORS.PATTERN_MISMATCH;
     state = "error";
   };
 </script>
@@ -113,11 +107,11 @@
   </div>
 
   <div class="hints">
-    {#if message}
-      <div transition:slide={{ duration: 250, easing: cubicOut }}>
+    {#key message}
+      <p transition:slide={{ duration: 250, easing: cubicOut }}>
         {message}
-      </div>
-    {/if}
+      </p>
+    {/key}
   </div>
 </div>
 
@@ -134,7 +128,6 @@
       "prepend field append"
       ". hints hints";
     grid-template-columns: min-content 1fr min-content;
-    font-size: 20px;
     /* line-height must not impact the input nor the label to preserve
        their relative position */
     transition: color 250ms;
@@ -194,6 +187,8 @@
     padding: 0;
     background-color: transparent;
     font-size: inherit;
+    /* If not set, browser styles will prevent it from shrinking */
+    min-width: 0;
     line-height: var(--contentHeight);
     transition: background-color 250ms linear;
 
@@ -220,8 +215,15 @@
     /* Add a small margin, so that characters are not clipped */
     height: 1.1em;
     margin-top: 0.4em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+
+    & > p {
+      /* Prevent generic `p` styles from applying */
+      font-size: inherit;
+      line-height: inherit;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 </style>
