@@ -6,7 +6,9 @@
   export let size: "small" | "medium" | "large" = "medium";
   export let block = false;
   export let icon = false;
+  export let shrinkToIcon = false;
   export let loading = false;
+  export let style = "";
   let className = "";
   export { className as class };
 </script>
@@ -16,13 +18,17 @@
   class:block
   class:loading
   class:icon
+  class:shrinkToIcon
   {disabled}
+  {style}
   on:click
 >
   <div class="prepend">
     <slot name="prepend" />
   </div>
-  <slot />
+  <div class="content">
+    <slot />
+  </div>
   <div class="append">
     <slot name="append" />
   </div>
@@ -53,18 +59,22 @@
     height: 2.7em;
     min-width: 64px;
     max-width: 100%;
-    white-space: nowrap;
+    /* To hide the ripple outside the button */
     overflow: hidden;
-    text-overflow: ellipsis;
     transition:
       background 250ms,
       width 250ms,
       height 250ms,
       color 250ms,
-      border-radius 250ms,
       font-size 250ms,
       box-shadow 250ms,
       outline 50ms;
+  }
+
+  .content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   button:hover {
@@ -177,6 +187,25 @@
     font-size: 25px;
   }
 
+  @media (max-width: 960px) {
+    .shrinkToIcon {
+      padding: 0;
+      width: 2.7em;
+      min-width: initial;
+      border-radius: 50%;
+      /* In case it is placed in a flex container */
+      flex-shrink: 0;
+    }
+
+    .shrinkToIcon .content {
+      display: none;
+    }
+
+    .shrinkToIcon .prepend, .shrinkToIcon .append {
+      margin: 0;
+    }
+  }
+
   .loading,
   .loading * {
     color: transparent;
@@ -186,8 +215,8 @@
   .loading::after {
     content: "";
     position: absolute;
-    width: 16px;
-    height: 16px;
+    width: 0.8em;
+    height: 0.8em;
     top: 0;
     left: 0;
     right: 0;

@@ -60,7 +60,6 @@
 
   .label {
     position: absolute;
-    z-index: -1;
     top: 0;
     left: 0;
     max-width: 100%;

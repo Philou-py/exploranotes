@@ -1,6 +1,3 @@
-<script lang="ts" context="module">
-</script>
-
 <script lang="ts">
   import type { FormEventHandler } from "svelte/elements";
   import InputField from "./InputField.svelte";
@@ -9,6 +6,7 @@
 
   export let type: "text" | "email" | "password" | "date" | "url" = "text";
   export let value = "";
+  export let name = "";
   export let label = "";
   export let placeholder = "";
   export let disabled = false;
@@ -16,7 +14,6 @@
   export let minlength: number | undefined = undefined;
   export let pattern: string | undefined = undefined;
   export let required = false;
-  export let fullWidth = false;
   export let focused = false;
   export let hint = "";
 
@@ -40,6 +37,8 @@
   let active = type === "date";
   let showPlaceholder = false;
   let message = "";
+  let dirty = false;
+  let input: HTMLInputElement;
 
   const handleFocus = () => {
     active = true;
@@ -55,29 +54,47 @@
     if (state === "default" || state === "valid") message = "";
   };
 
+  $: {
+    // All variables should be figure for reactivity
+    if (disabled) {
+      state = "default";
+      message = "";
+      // Resetting 'value' is necessary, as when toggling props, 'input.validity'
+      // does not take into account the new prop.
+      value = "";
+      dirty = false;
+      handleBlur();
+    } else if (input && dirty) {
+      console.log(input.validity.valid, required);
+      // maxlength is not placed on the input to allow the user to continue typing
+      // even past the limit
+      if (input.validity.valid && !(value.length > maxlength)) {
+        state = "valid";
+        message = hint;
+      } else {
+        if (required && input.validity.valueMissing) {
+          message = ERRORS.VALUE_MISSING;
+          state = "required";
+        } else {
+          if (minlength && input.validity.tooShort) message = ERRORS.TOO_SHORT;
+          else if (value.length > maxlength) message = ERRORS.TOO_LONG;
+          else if (type && input.validity.typeMismatch) message = ERRORS.TYPE_MISMATCH;
+          else if (pattern && input.validity.patternMismatch) message = ERRORS.PATTERN_MISMATCH;
+          state = "error";
+        }
+      }
+    }
+  }
+
+  // Binding 'value' on the input is not allowed when 'type' is variable
   const handleInput: FormEventHandler<HTMLInputElement> = (event) => {
     const input = event.currentTarget;
     value = input.value;
-
-    if (input.validity.valid && !(value.length > maxlength)) {
-      state = "valid";
-      message = hint;
-      return;
-    }
-
-    if (input.validity.valueMissing) {
-      message = ERRORS.VALUE_MISSING;
-      state = "required";
-      return;
-    } else if (input.validity.tooShort) message = ERRORS.TOO_SHORT;
-    else if (value.length > maxlength) message = ERRORS.TOO_LONG;
-    else if (input.validity.typeMismatch) message = ERRORS.TYPE_MISMATCH;
-    else if (input.validity.patternMismatch) message = ERRORS.PATTERN_MISMATCH;
-    state = "error";
+    if (!dirty) dirty = true;
   };
 </script>
 
-<div class="textField {state}" class:focused class:fullWidth>
+<div class="textField {state}" class:focused class:disabled>
   <div class="prepend">
     <slot name="prepend" />
   </div>
@@ -89,6 +106,7 @@
     <input
       {id}
       {value}
+      {name}
       {type}
       {placeholder}
       {minlength}
@@ -99,6 +117,7 @@
       on:input={handleInput}
       on:focus={handleFocus}
       on:blur={handleBlur}
+      bind:this={input}
     />
   </InputField>
 
@@ -116,13 +135,19 @@
 </div>
 
 <style lang="scss">
-  $blue: #1867c0;
-  $green: #3cbe72;
+  /* $blue: #1867c0; */
+  /* Princess blue */
+  $blue: #00539c;
+  /* $green: #3cbe72; */
+  /* Eden */
+  $green: lighten(#264e36, 20%);
   $dark-red: #9e1030;
-  $red: #ff5252;
+  /* $red: #ff5252; */
+  /* Fiesta */
+  $red: lighten(#dd4132, 10%);
 
   .textField {
-    display: inline grid;
+    display: grid;
     color: rgb(0 0 0 / 0.7);
     grid-template-areas:
       "prepend field append"
@@ -130,11 +155,9 @@
     grid-template-columns: min-content 1fr min-content;
     /* line-height must not impact the input nor the label to preserve
        their relative position */
-    transition: color 250ms;
-
-    &.fullWidth {
-      display: grid;
-    }
+    transition:
+      color 250ms,
+      opacity 250ms;
 
     &:hover {
       color: rgb(0 0 0 / 0.9);
@@ -177,12 +200,18 @@
       }
       */
     }
+
+    &.disabled {
+      opacity: 0.6;
+      pointer-events: none;
+    }
   }
 
   input {
     font-family: inherit;
     color: black;
     border: none;
+    flex-grow: 1;
     outline: 0;
     padding: 0;
     background-color: transparent;
@@ -211,9 +240,11 @@
   .hints {
     grid-area: hints;
     font-size: 0.8em;
-    line-height: 1em;
-    /* Add a small margin, so that characters are not clipped */
-    height: 1.1em;
+    /* Include a small margin, so that characters are not clipped.
+       Instead, they will overflow slightly under the hints div. */
+    line-height: 1.1em;
+    /* Set the height to prevent it from disappearing when it contains no text */
+    height: 1em;
     margin-top: 0.4em;
 
     & > p {

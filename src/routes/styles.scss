@@ -1,5 +1,11 @@
 @import "@fontsource/cormorant-upright/400.css";
 
+$xs: 600px;
+$sm: 960px;
+$md: 1264px;
+$lg: 1904px;
+
+// Vuetify colours
 :root {
   --red: #f44336;
   --pink: #e91e63;
@@ -22,6 +28,19 @@
   --grey: #9e9e9e;
 }
 
+// W3Schools Colors 2019
+// https://www.w3schools.com/colors/colors_2019.asp
+:root {
+  --fiesta: #dd4132;
+  --jester-red: #9e1030;
+  --turmeric: #fe840e;
+  --aspen-gold: #ffd662;
+  --dark-cheddar: #e08119;
+  --princess-blue: #00539c;
+  --pepper-stem: #8d9440;
+  --eden: #264e36;
+}
+
 body {
   font-family: "Cormorant Upright", serif;
   // Enlever l'arrière-plan bleu lors d'un clic sur un bouton sur mobiles :
@@ -29,6 +48,8 @@ body {
   -webkit-tap-highlight-color: transparent;
   // Cette propriété permet de rendre le scrolling doux lors du clic sur un lien faisant référence à une autre endroit dans la page grâce à un id
   scroll-behavior: smooth;
+  // Chrome sets an 8px margin
+  margin: 0;
 }
 
 svg {
@@ -46,3 +67,125 @@ a {
   margin-bottom: 20px;
 }
 
+.card {
+  display: grid;
+  box-sizing: border-box;
+  padding: 1.5em;
+  grid-template:
+    "header" min-content
+    "content" 1fr
+    "actions" min-content;
+  max-height: 95%;
+  overflow: auto;
+  border-radius: 20px;
+  box-shadow:
+    0px 3px 1px -2px rgb(0 0 0 / 20%),
+    0px 2px 2px 0px rgb(0 0 0 / 14%),
+    0px 1px 5px 0px rgb(0 0 0 / 12%);
+  color: var(--colour, #444);
+  background-color: var(--bg-colour, white);
+
+  header {
+    grid-area: header;
+    margin-bottom: 1em;
+
+    p {
+      margin: 0;
+    }
+  }
+}
+
+.cardTitle {
+  margin: 0;
+  color: #212121;
+}
+
+.cardSubtitle {
+  margin: 0;
+  color: rgb(0 0 0 / 0.54);
+}
+
+.cardContent {
+  grid-area: content;
+}
+
+.cardActions {
+  grid-area: actions;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 1em;
+}
+
+.container.xNarrow {
+  padding: 0 20px;
+}
+
+.container.narrow {
+  @media (max-width: $xs) {
+    padding: 0 2%;
+  }
+
+  @media (max-width: $sm) {
+    padding: 0 4%;
+  }
+
+  @media (max-width: $md) {
+    padding: 0 5%;
+  }
+
+  @media (max-width: $lg) {
+    padding: 0 7%;
+  }
+
+  @media (min-width: $lg) {
+    padding: 0 13%;
+  }
+}
+
+.container {
+  box-sizing: border-box;
+
+  @media (max-width: $xs) {
+    padding: 0 3%;
+  }
+
+  @media (max-width: $sm) {
+    padding: 0 5%;
+  }
+
+  @media (max-width: $md) {
+    padding: 0 10%;
+  }
+
+  @media (max-width: $lg) {
+    padding: 0 13%;
+  }
+
+  @media (min-width: $lg) {
+    padding: 0 18%;
+  }
+}
+
+.container.large {
+  @media (max-width: $xs) {
+    padding: 0 5%;
+  }
+
+  @media (max-width: $sm) {
+    padding: 0 10%;
+  }
+
+  @media (max-width: $md) {
+    padding: 0 15%;
+  }
+
+  @media (max-width: $lg) {
+    padding: 0 20%;
+  }
+
+  @media (min-width: $lg) {
+    padding: 0 25%;
+  }
+}

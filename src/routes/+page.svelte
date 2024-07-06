@@ -7,7 +7,7 @@
   import Modal from "components/Modal.svelte";
   import SnackBars, { snackBars } from "components/SnackBars.svelte";
   import DataTable from "components/DataTable.svelte";
-    import {flip} from "svelte/animate";
+  import NavBar from "components/NavBar.svelte";
 
   let showModal = false;
   let snackBarCount = 1;
@@ -23,7 +23,7 @@
     <AccountCircle slot="append" />
     Hello, <strong>world</strong>!</Button
   >
-  <Button --primary="var(--red)" --secondary="white" variant="filled" size="small">
+  <Button --primary="var(--red)" --secondary="white" variant="filled" size="small" shrinkToIcon>
     <AccountCircle slot="append" />
     Hello, <strong>world</strong>!</Button
   >
@@ -31,15 +31,17 @@
     <AccountCircle slot="append" />
     Hello, <strong>world</strong>!</Button
   >
-  <Button
-    variant="elevated"
-    size="large"
-    --primary={lighten("var(--yellow)", 55)}
-    --secondary="black"
-  >
-    <AccountCircle slot="prepend" />
-    Hello, <strong>world</strong>!</Button
-  >
+  <a href="https://svelte.dev">
+    <Button
+      variant="elevated"
+      size="large"
+      --primary={lighten("var(--yellow)", 55)}
+      --secondary="black"
+    >
+      <AccountCircle slot="prepend" />
+      Hello, <strong>world</strong>!</Button
+    >
+  </a>
   <Button
     variant="elevated"
     size="large"
@@ -68,15 +70,17 @@
   >
     <AccountCircle />
   </Button>
-  <Button
-    variant="flat"
-    size="large"
-    --primary={lighten("var(--purple)", 20)}
-    --secondary="white"
-    icon
-  >
-    <AccountCircle />
-  </Button>
+  <a href="https://svelte.dev">
+    <Button
+      variant="flat"
+      size="large"
+      --primary={lighten("var(--purple)", 20)}
+      --secondary="white"
+      icon
+    >
+      <AccountCircle />
+    </Button>
+  </a>
   <br />
   <br />
   <div>
@@ -103,7 +107,7 @@
       { key: 3, name: "Daddy", age: 50 },
     ]}
     lineNumbering
-    >
+  >
     <tr slot="item" let:item={{ name, age }} let:lineNumber>
       <td class="center">{lineNumber}</td>
       <td>{name}</td>
