@@ -1,27 +1,48 @@
 <script lang="ts">
+  import type { SubmitFunction } from "./$types";
   import { lighten } from "$lib/utilities";
   import Button from "components/Button.svelte";
   import TextField from "components/TextField.svelte";
   import Face from "svelte-material-icons/FaceManOutline.svelte";
   import FaceShimmer from "svelte-material-icons/FaceManShimmerOutline.svelte";
-  import TicketConfirmation from "svelte-material-icons/TicketConfirmation.svelte";
   import Badge from "svelte-material-icons/BadgeAccountHorizontalOutline.svelte";
   import AccountCircle from "svelte-material-icons/AccountCircle.svelte";
   import Lock from "svelte-material-icons/Lock.svelte";
   import Send from "svelte-material-icons/Send.svelte";
-  import { slide } from "svelte/transition";
-  import Checkbox from "components/Checkbox.svelte";
+  import { applyAction, enhance } from "$app/forms";
+  import { snackBars } from "components/SnackBars.svelte";
+  import { goto } from "$app/navigation";
 
   let accountType: "teacher" | "student" = "student";
-  let noIne = false;
+  let loading = false;
+
+  const handleSubmit: SubmitFunction = ({ formData }) => {
+    loading = true;
+    formData.set("sideBarOpen", window.matchMedia("(max-width: 960px)").matches ? "no" : "yes");
+
+    return async ({ result }) => {
+      loading = false;
+      switch (result.type) {
+        case "success":
+          snackBars.haveASnack(result.data!.message);
+          goto("/signup/email-verif", { invalidateAll: true });
+          break;
+        case "failure":
+          snackBars.haveASnack(result.data!.message, "error");
+          break;
+        default:
+          await applyAction(result);
+      }
+    };
+  };
 </script>
 
 <div class="card" style:--bg-colour={lighten("var(--aspen-gold)", 70)}>
   <header>
     <h1 class="cardTitle">Inscription</h1>
   </header>
-  <div class="content">
-    <form>
+  <form method="POST" use:enhance={handleSubmit}>
+    <div class="content">
       <div class="accountRadio">
         <span>
           <Badge class="icon" />
@@ -49,51 +70,43 @@
         </div>
       </div>
 
-      <TextField type="email" name="email" label="Adresse email" required>
+      <TextField type="email" name="email" autocomplete="email" label="Adresse email" required>
         <AccountCircle slot="prepend" />
       </TextField>
-      <TextField type="password" name="password" label="Mot de passe" minlength={6} required>
+      <TextField
+        type="password"
+        name="password"
+        autocomplete="new-password"
+        label="Mot de passe"
+        minlength={7}
+        required
+      >
         <Lock slot="prepend" />
       </TextField>
 
-      <TextField name="firstName" label="Prénom" required>
+      <TextField name="firstName" label="Prénom" autocomplete="given-name" required>
         <FaceShimmer slot="prepend" />
       </TextField>
-      <TextField name="lastName" label="Nom de famille" required>
+      <TextField name="lastName" label="Nom de famille" autocomplete="family-name" required>
         <Face slot="prepend" />
       </TextField>
+    </div>
 
-      {#if accountType === "student"}
-        <div transition:slide={{ duration: 250 }}>
-          <TextField
-            name="ine"
-            label="Numéro INE"
-            placeholder="Exemple : 090299629KG"
-            hint="Il figure en général sur les bulletins."
-            minlength={11}
-            maxlength={11}
-            disabled={noIne}
-            required={!noIne}
-          >
-            <TicketConfirmation slot="prepend" />
-          </TextField>
-          <Checkbox name="noIne" bind:checked={noIne} title="Par exemple, pour les étudiants étrangers">
-            <svelte:fragment slot="right">Pas de numéro INE ?</svelte:fragment>
-          </Checkbox>
-        </div>
-      {/if}
-    </form>
-  </div>
-
-  <div class="cardActions">
-    <a href="/signin">
-      <Button variant="text">Déjà un compte ?</Button>
-    </a>
-    <Button --primary={lighten("var(--dark-cheddar)", 30)} style="margin-left: auto">
-      Valider
-      <Send slot="append" />
-    </Button>
-  </div>
+    <div class="cardActions">
+      <a href="/signin" tabindex="-1">
+        <Button variant="text">Déjà un compte ?</Button>
+      </a>
+      <Button
+        formSubmit
+        {loading}
+        --primary={lighten("var(--dark-cheddar)", 30)}
+        style="margin-left: auto"
+      >
+        Valider
+        <Send slot="append" />
+      </Button>
+    </div>
+  </form>
 </div>
 
 <style>

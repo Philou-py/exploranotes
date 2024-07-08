@@ -15,7 +15,8 @@
 </label>
 
 <style lang="scss">
-  $blue: #1867c0;
+  /* Princess blue */
+  $blue: #00539c;
 
   label {
     display: block;

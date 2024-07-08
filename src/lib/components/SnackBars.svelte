@@ -18,8 +18,8 @@
     endASnack,
     haveASnack: (
       message: string,
-      type: "info" | "success" | "error",
-      duration: number = 3000,
+      type: "info" | "success" | "error" = "success",
+      duration: number = 5000,
       dismissable: boolean = true,
     ) => {
       // currentId captures id by value, which retains the original id

@@ -7,6 +7,7 @@
   export let block = false;
   export let icon = false;
   export let shrinkToIcon = false;
+  export let formSubmit = false;
   export let loading = false;
   export let style = "";
   let className = "";
@@ -14,14 +15,15 @@
 </script>
 
 <button
+  type={formSubmit ? "submit" : "button"}
   class="{variant} {size} {className}"
   class:block
   class:loading
   class:icon
   class:shrinkToIcon
+  on:click
   {disabled}
   {style}
-  on:click
 >
   <div class="prepend">
     <slot name="prepend" />
@@ -53,11 +55,11 @@
     cursor: pointer;
     padding: 0 1.2em;
     font-family: inherit;
-    font-size: 15px;
+    font-size: 0.75em;
     font-weight: 500;
     text-transform: uppercase;
     height: 2.7em;
-    min-width: 64px;
+    min-width: 3.2em;
     max-width: 100%;
     /* To hide the ripple outside the button */
     overflow: hidden;
@@ -94,11 +96,11 @@
   }
 
   .prepend {
-    margin-right: 8px;
+    margin-right: 0.4em;
   }
 
   .append {
-    margin-left: 8px;
+    margin-left: 0.4em;
   }
 
   .block {
@@ -155,19 +157,19 @@
   }
 
   .small {
-    min-width: 50px;
-    font-size: 12px;
+    min-width: 2.5em;
+    font-size: 0.6em;
   }
 
   .large {
-    min-width: 74px;
-    font-size: 18px;
+    min-width: 3.7em;
+    font-size: 0.9em;
   }
 
   .icon {
-    width: 50px;
-    height: 50px;
-    font-size: 18px;
+    width: 2.5em;
+    height: 2.5em;
+    font-size: 0.9em;
     padding: 0;
     min-width: initial;
     border-radius: 50%;
@@ -176,15 +178,11 @@
   }
 
   .icon.small {
-    width: 40px;
-    height: 40px;
-    font-size: 15px;
+    font-size: 0.75em;
   }
 
   .icon.large {
-    width: 60px;
-    height: 60px;
-    font-size: 25px;
+    font-size: 1.25em;
   }
 
   @media (max-width: 960px) {
@@ -201,7 +199,8 @@
       display: none;
     }
 
-    .shrinkToIcon .prepend, .shrinkToIcon .append {
+    .shrinkToIcon .prepend,
+    .shrinkToIcon .append {
       margin: 0;
     }
   }

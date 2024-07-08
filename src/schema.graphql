@@ -13,7 +13,6 @@ type Teacher @secret(field: "password") {
 type Student @secret(field: "password") {
   id: ID!
   email: String @search(by: [hash])
-  ine: String @search(by: [hash])
   firstName: String! @search(by: [exact])
   lastName: String! @search(by: [exact])
   name: String! @search(by: [fulltext])
@@ -136,4 +135,3 @@ type CriterionResult {
   criterion: Criterion! @hasInverse(field: "criterionResults")
   categoryResult: CategoryResult @hasInverse(field: "criterionResults")
 }
-

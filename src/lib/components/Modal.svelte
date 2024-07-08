@@ -53,6 +53,8 @@
   }
 
   .modal {
+    max-height: 95%;
+    overflow: auto;
     visibility: hidden;
     transform: scale(40%);
     transition:

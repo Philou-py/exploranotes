@@ -1,6 +1,6 @@
 <script lang="ts">
   import Button from "./Button.svelte";
-  import logo from "$lib/images/logo.png";
+  import logo from "$lib/images/logo-128.webp";
   import Login from "svelte-material-icons/Login.svelte";
 
   interface CurrentUser {

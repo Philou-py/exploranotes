@@ -1,0 +1,149 @@
+email: string @index(hash) .
+password: password .
+firstName: string @index(hash) .
+lastName: string @index(hash) .
+name: string @index(fulltext) .
+verifiedEmail: bool @index(bool) .
+groups: [uid] @reverse .
+school: uid @reverse .
+evaluations: [uid] @reverse .
+evalTemplates: [uid] .
+copies: [uid] @reverse .
+schoolYear: int @index(int) .
+level: string @index(fulltext) .
+subject: string @index(fulltext) .
+marked: bool @index(bool) .
+primary: bool @index(bool) .
+city: string @index(fulltext) .
+academy: string @index(fulltext) .
+title: string @index(fulltext) .
+coefficient: float .
+markPrecision: float .
+categories: [uid] @reverse .
+rank: int .
+label: string @index(fulltext) .
+maxPoints: float @index(float) .
+criteria: [uid] @reverse .
+isBonus: bool .
+isPublished: bool .
+categoryResults: [uid] @reverse .
+criterionResults: [uid] @reverse .
+points: float @index(float) .
+mark: float @index(float) .
+comment: string .
+bonus: float .
+penalty: float .
+notAttempted: bool @index(bool) .
+creationDate: datetime .
+
+type Category {
+  rank
+  label
+  maxPoints
+  criteria
+  categoryResults
+}
+
+type CategoryResult {
+  points
+  comment
+  criterionResults
+}
+
+type CategoryTemplate {
+  rank
+  label
+  maxPoints
+  criteria
+}
+
+type Copy {
+  points
+  mark
+  comment
+  bonus
+  penalty
+  categoryResults
+}
+
+type Criterion {
+  rank
+  label
+  maxPoints
+  isBonus
+  criterionResults
+}
+
+type CriterionResults {
+  points
+  notAttempted
+}
+
+type CriterionTemplate {
+  rank
+  label
+  maxPoints
+  isBonus
+}
+
+type EvalTemplate {
+  title
+  coefficient
+  markPrecision
+}
+
+type Evaluation {
+  title
+  coefficient
+  markPrecision
+  maxPoints
+  categories
+  copies
+  isPublished
+  creationDate
+}
+
+type Group {
+  name
+  schoolYear
+  level
+  subject
+  evaluations
+  marked
+  primary
+  creationDate
+}
+
+type School {
+  name
+  city
+  academy
+  groups
+  creationDate
+}
+
+type Student {
+  email
+  password
+  verifiedEmail
+  firstName
+  lastName
+  name
+  school
+  groups
+  copies
+  creationDate
+}
+
+type Teacher {
+  email
+  password
+  verifiedEmail
+  firstName
+  lastName
+  name
+  school
+  evaluations
+  evalTemplates
+  creationDate
+}

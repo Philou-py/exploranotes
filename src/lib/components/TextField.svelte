@@ -9,6 +9,7 @@
   export let name = "";
   export let label = "";
   export let placeholder = "";
+  export let autocomplete = "off";
   export let disabled = false;
   export let maxlength: number = 200;
   export let minlength: number | undefined = undefined;
@@ -55,6 +56,9 @@
   };
 
   $: {
+    // Reset custom message for maxlength: the input will be valid if no other error is detected
+    if (input) input.setCustomValidity("");
+
     // All variables should be figure for reactivity
     if (disabled) {
       state = "default";
@@ -65,7 +69,6 @@
       dirty = false;
       handleBlur();
     } else if (input && dirty) {
-      console.log(input.validity.valid, required);
       // maxlength is not placed on the input to allow the user to continue typing
       // even past the limit
       if (input.validity.valid && !(value.length > maxlength)) {
@@ -77,8 +80,10 @@
           state = "required";
         } else {
           if (minlength && input.validity.tooShort) message = ERRORS.TOO_SHORT;
-          else if (value.length > maxlength) message = ERRORS.TOO_LONG;
-          else if (type && input.validity.typeMismatch) message = ERRORS.TYPE_MISMATCH;
+          else if (value.length > maxlength) {
+            message = ERRORS.TOO_LONG;
+            input.setCustomValidity(`Veuillez entrer au maximum ${maxlength} caractères.`);
+          } else if (type && input.validity.typeMismatch) message = ERRORS.TYPE_MISMATCH;
           else if (pattern && input.validity.patternMismatch) message = ERRORS.PATTERN_MISMATCH;
           state = "error";
         }
@@ -109,6 +114,7 @@
       {name}
       {type}
       {placeholder}
+      {autocomplete}
       {minlength}
       {pattern}
       {required}
@@ -135,14 +141,17 @@
 </div>
 
 <style lang="scss">
-  /* $blue: #1867c0; */
+  /* Old colours:
+     $blue: #1867c0;
+     $green: #3cbe72;
+     $red: #ff5252;
+  */
+
+  $jesterRed: #9e1030;
   /* Princess blue */
   $blue: #00539c;
-  /* $green: #3cbe72; */
   /* Eden */
   $green: lighten(#264e36, 20%);
-  $dark-red: #9e1030;
-  /* $red: #ff5252; */
   /* Fiesta */
   $red: lighten(#dd4132, 10%);
 
@@ -179,10 +188,10 @@
     }
 
     &.required {
-      color: $dark-red;
+      color: $jesterRed;
       &:hover,
       &.focused {
-        color: darken($dark-red, 10%);
+        color: darken($jesterRed, 10%);
       }
     }
 

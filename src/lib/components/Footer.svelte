@@ -43,14 +43,20 @@
 </footer>
 
 <style>
+  /* https://css-tricks.com/a-clever-sticky-footer-technique/ */
+  :global(html, body) {
+    height: 100%;
+  }
+
   footer {
+    position: sticky;
+    top: 100vh;
+    display: flex;
     padding: 10px 0;
     text-align: center;
     color: white;
-    display: flex;
     justify-content: space-between;
     flex-direction: row;
-    position: relative;
   }
 
   @media (max-width: 960px) {

@@ -1,16 +1,29 @@
-<script>
-  import { darken, lighten } from "$lib/utilities";
+<script lang="ts">
+  import { lighten } from "$lib/utilities";
   import Button from "$lib/components/Button.svelte";
   import AccountCircle from "svelte-material-icons/AccountCircle.svelte";
   import TextField from "$lib/components/TextField.svelte";
   import Card from "components/Card.svelte";
   import Modal from "components/Modal.svelte";
-  import SnackBars, { snackBars } from "components/SnackBars.svelte";
+  import { snackBars } from "components/SnackBars.svelte";
   import DataTable from "components/DataTable.svelte";
-  import NavBar from "components/NavBar.svelte";
+  import { applyAction, enhance } from "$app/forms";
+  import type { SubmitFunction } from "./signup/$types";
 
   let showModal = false;
   let snackBarCount = 1;
+
+  const handleSignOut: SubmitFunction =
+    () =>
+    async ({ result }) => {
+      switch (result.type) {
+        case "success":
+          snackBars.haveASnack(result.data!.message);
+          break;
+        default:
+          await applyAction(result);
+      }
+    };
 </script>
 
 <svelte:head>
@@ -31,17 +44,18 @@
     <AccountCircle slot="append" />
     Hello, <strong>world</strong>!</Button
   >
-  <a href="https://svelte.dev">
+  <form method="POST" action="signout" use:enhance={handleSignOut} style="display: inline">
     <Button
       variant="elevated"
       size="large"
       --primary={lighten("var(--yellow)", 55)}
       --secondary="black"
+      formSubmit
     >
       <AccountCircle slot="prepend" />
-      Hello, <strong>world</strong>!</Button
-    >
-  </a>
+      Déconnexion
+    </Button>
+  </form>
   <Button
     variant="elevated"
     size="large"
@@ -50,7 +64,7 @@
     on:click={() => (showModal = true)}
   >
     <AccountCircle slot="append" />
-    Hello, <strong>world</strong>!</Button
+    Hello, <strong>modal</strong>!</Button
   >
   <Button variant="elevated" size="small" icon>
     <AccountCircle />
@@ -115,7 +129,28 @@
     </tr>
   </DataTable>
 
-  <SnackBars />
+  <p>
+    Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione nulla exercitationem, sapiente
+    error laborum velit non! Quasi error provident fugit, modi quia ducimus amet, doloribus odit,
+    est autem quo omnis placeat sint cupiditate. Debitis obcaecati sint ad consequuntur nihil
+    inventore sapiente praesentium optio maiores, ducimus ut in similique, nisi possimus velit
+    dolores. Non distinctio temporibus explicabo numquam corporis ratione vero eum praesentium
+    tenetur vel asperiores, iusto repellat eius aperiam eveniet vitae eligendi minima illum odio
+    fugiat doloremque dolorem, consectetur libero possimus! Labore unde nam ea deserunt. Omnis
+    debitis corrupti, asperiores exercitationem ab earum odio corporis quisquam. Nesciunt eaque
+    doloremque quaerat.
+  </p>
+  <p>
+    Lorem ipsum dolor sit amet consectetur adipisicing elit. Ratione nulla exercitationem, sapiente
+    error laborum velit non! Quasi error provident fugit, modi quia ducimus amet, doloribus odit,
+    est autem quo omnis placeat sint cupiditate. Debitis obcaecati sint ad consequuntur nihil
+    inventore sapiente praesentium optio maiores, ducimus ut in similique, nisi possimus velit
+    dolores. Non distinctio temporibus explicabo numquam corporis ratione vero eum praesentium
+    tenetur vel asperiores, iusto repellat eius aperiam eveniet vitae eligendi minima illum odio
+    fugiat doloremque dolorem, consectetur libero possimus! Labore unde nam ea deserunt. Omnis
+    debitis corrupti, asperiores exercitationem ab earum odio corporis quisquam. Nesciunt eaque
+    doloremque quaerat.
+  </p>
 
   <Modal bind:show={showModal} closeOnBgClick>
     <Card>

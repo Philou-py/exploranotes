@@ -1,3 +1,12 @@
+@import "@fontsource/cormorant-upright/400.css";
+// Saves 33kB
+// @import "@fontsource/cormorant-upright/500.css";
+
+body {
+  font-family: "Cormorant Upright", serif;
+  font-size: 20px;
+}
+
 p,
 li,
 td,
@@ -11,12 +20,12 @@ label,
 
 th {
   font-size: 22px;
-  font-weight: 500;
+  // font-weight: 500;
 }
 
 h1 {
   font-size: 3.25rem;
-  font-weight: 500;
+  // font-weight: 500;
   margin: 0.5em;
   text-align: center;
 
@@ -28,7 +37,7 @@ h1 {
 
 h2 {
   font-size: 2.75rem;
-  font-weight: 500;
+  // font-weight: 500;
   margin: 0;
 
   &.xs,
@@ -39,7 +48,7 @@ h2 {
 
 h3 {
   font-size: 2.25rem;
-  font-weight: 500;
+  // font-weight: 500;
   margin: 0;
 
   &.xs,
@@ -50,19 +59,19 @@ h3 {
 
 h4 {
   font-size: 1.75rem;
-  font-weight: 500;
+  // font-weight: 500;
   margin: 0;
 }
 
 h5 {
   font-size: 1.5rem;
-  font-weight: 500;
+  // font-weight: 500;
   margin: 0;
 }
 
 h6 {
   font-size: 1.25rem;
-  font-weight: 500;
+  // font-weight: 500;
   margin: 0;
 }
 

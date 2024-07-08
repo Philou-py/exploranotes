@@ -2,10 +2,12 @@
   import { onNavigate } from "$app/navigation";
   import NavBar from "components/NavBar.svelte";
   import Footer from "components/Footer.svelte";
+  import SnackBars from "components/SnackBars.svelte";
   import "./styles.scss";
   import "./typography.scss";
 
   onNavigate((navigation) => {
+    // https://svelte.dev/blog/view-transitions
     // @ts-expect-error
     if (!document.startViewTransition) return;
 
@@ -19,10 +21,9 @@
   });
 </script>
 
-<div class="app">
-  <NavBar />
-  <main>
-    <slot />
-  </main>
-  <Footer />
-</div>
+<NavBar />
+<main>
+  <slot />
+</main>
+<Footer />
+<SnackBars />

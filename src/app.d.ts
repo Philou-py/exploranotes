@@ -3,7 +3,15 @@
 declare global {
   namespace App {
     // interface Error {}
-    // interface Locals {}
+    interface Locals {
+      currentUser: {
+        uid: string;
+        accountType: "teacher" | "student";
+        email: string;
+        name: string;
+        verifiedEmail: boolean;
+      } | null;
+    }
     // interface PageData {}
     // interface PageState {}
     // interface Platform {}
