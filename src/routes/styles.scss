@@ -38,6 +38,9 @@ $lg: 1904px;
   --pepper-stem: #8d9440;
   --eden: #264e36;
   --living-coral: #ff6f61;
+  --creme-de-peche: #f5d6c6;
+  --peach-pink: #fa9a85;
+  --fruit-dove: #ce5b78;
 }
 
 $jesterRed: #9e1030;
@@ -70,13 +73,8 @@ a {
 }
 
 .card {
-  display: grid;
   box-sizing: border-box;
-  padding: 1.5em;
-  grid-template:
-    "header" min-content
-    "content" 1fr
-    "actions" min-content;
+  padding: 2em;
   border-radius: 20px;
   box-shadow:
     0px 3px 1px -2px rgb(0 0 0 / 20%),
@@ -86,7 +84,6 @@ a {
   background-color: var(--bg-colour, white);
 
   header {
-    grid-area: header;
     margin-bottom: 1em;
 
     p {
@@ -105,17 +102,41 @@ a {
   color: rgb(0 0 0 / 0.54);
 }
 
-.cardContent {
-  grid-area: content;
-}
-
 .cardActions {
-  grid-area: actions;
   display: flex;
   justify-content: flex-end;
   align-items: center;
   flex-wrap: wrap;
   margin-top: 1em;
+}
+
+.card.formCard {
+  width: clamp(450px, 50%, 600px);
+  margin: 30px auto;
+
+  @media (max-width: 960px) {
+    width: 90%;
+  }
+
+  @media (max-width: 600px) {
+    margin: 0;
+    width: 100%;
+    box-shadow: none;
+    border-radius: 0;
+    background-color: white;
+  }
+
+  .cardTitle {
+    text-align: center;
+  }
+
+  .cardActions {
+    justify-content: space-between;
+
+    button[type=submit] {
+      margin-left: auto;
+    }
+  }
 }
 
 .container.xNarrow {

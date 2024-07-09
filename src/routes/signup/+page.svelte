@@ -37,71 +37,64 @@
   };
 </script>
 
-<div class="card" style:--bg-colour={lighten("var(--aspen-gold)", 70)}>
+<div class="card formCard" style:--bg-colour={lighten("var(--aspen-gold)", 70)}>
   <header>
-    <h1 class="cardTitle">Inscription</h1>
+    <h2 class="cardTitle">Inscription</h2>
   </header>
   <form method="POST" use:enhance={handleSubmit}>
-    <div class="content">
-      <div class="accountRadio">
-        <span>
-          <Badge class="icon" />
-          Type de compte :
-        </span>
-        <div class="radioGroup">
-          <input
-            type="radio"
-            name="accountType"
-            id="student"
-            value="student"
-            checked={accountType === "student"}
-            on:change={() => (accountType = "student")}
-          />
-          <label for="student">Étudiant</label>
-          <input
-            type="radio"
-            name="accountType"
-            id="teacher"
-            value="teacher"
-            checked={accountType === "teacher"}
-            on:change={() => (accountType = "teacher")}
-          />
-          <label for="teacher">Professeur</label>
-        </div>
+    <div class="accountRadio">
+      <span>
+        <Badge class="icon" />
+        Type de compte :
+      </span>
+      <div class="radioGroup">
+        <input
+          type="radio"
+          name="accountType"
+          id="student"
+          value="student"
+          checked={accountType === "student"}
+          on:change={() => (accountType = "student")}
+        />
+        <label for="student">Étudiant</label>
+        <input
+          type="radio"
+          name="accountType"
+          id="teacher"
+          value="teacher"
+          checked={accountType === "teacher"}
+          on:change={() => (accountType = "teacher")}
+        />
+        <label for="teacher">Professeur</label>
       </div>
-
-      <TextField type="email" name="email" autocomplete="email" label="Adresse email" required>
-        <AccountCircle slot="prepend" />
-      </TextField>
-      <TextField
-        type="password"
-        name="password"
-        autocomplete="new-password"
-        label="Mot de passe"
-        minlength={7}
-        required
-      >
-        <Lock slot="prepend" />
-      </TextField>
-
-      <TextField name="firstName" label="Prénom" autocomplete="given-name" required>
-        <FaceShimmer slot="prepend" />
-      </TextField>
-      <TextField name="lastName" label="Nom de famille" autocomplete="family-name" required>
-        <Face slot="prepend" />
-      </TextField>
     </div>
+
+    <TextField type="email" name="email" autocomplete="email" label="Adresse email" required>
+      <AccountCircle slot="prepend" />
+    </TextField>
+    <TextField
+      type="password"
+      name="password"
+      autocomplete="new-password"
+      label="Mot de passe"
+      minlength={7}
+      required
+    >
+      <Lock slot="prepend" />
+    </TextField>
+
+    <TextField name="firstName" label="Prénom" autocomplete="given-name" required>
+      <FaceShimmer slot="prepend" />
+    </TextField>
+    <TextField name="lastName" label="Nom de famille" autocomplete="family-name" required>
+      <Face slot="prepend" />
+    </TextField>
 
     <div class="cardActions">
       <a href="/signin" tabindex="-1">
         <Button variant="text">Déjà un compte ?</Button>
       </a>
-      <Button
-        formSubmit
-        {loading}
-        --primary={lighten("var(--dark-cheddar)", 30)}
-        style="margin-left: auto"
-      >
+      <Button formSubmit {loading} --primary={lighten("var(--dark-cheddar)", 30)}>
         Valider
         <Send slot="append" />
       </Button>
@@ -110,31 +103,6 @@
 </div>
 
 <style>
-  .card {
-    width: clamp(350px, 40%, 600px);
-    margin: 30px auto;
-  }
-
-  @media (max-width: 960px) {
-    .card {
-      width: 90%;
-    }
-  }
-
-  @media (max-width: 600px) {
-    .card {
-      margin: 0;
-      width: 100%;
-      box-shadow: none;
-      border-radius: 0;
-      background-color: white;
-    }
-  }
-
-  .cardActions {
-    justify-content: space-between;
-  }
-
   .accountRadio {
     font-size: inherit;
     display: flex;

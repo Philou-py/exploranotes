@@ -1,5 +1,6 @@
 import { PUBLIC_KEY } from "$env/static/public";
 import { transporter } from "$lib/mail";
+import { redirect } from "@sveltejs/kit";
 import jwt from "jsonwebtoken";
 
 const { verify } = jwt;
@@ -16,31 +17,32 @@ transporter.verify((error) => {
 export const handle = async ({ event, resolve }) => {
   event.locals.currentUser = null;
   const jwt = event.cookies.get("Auth");
-  console.log(event.url.pathname, event.url.pathname.startsWith("/signup/email-verif"));
-  if (!jwt) {
-    return await resolve(event);
+
+  if (jwt) {
+    try {
+      const payload = verify(jwt, PUBLIC_KEY, { algorithms: ["ES256"] });
+      if (typeof payload === "object") {
+        const { accountType, uid, email, name, verifiedEmail } = payload;
+        event.locals.currentUser = {
+          accountType,
+          uid,
+          email,
+          name,
+          verifiedEmail: verifiedEmail !== false,
+        };
+      } else {
+        throw new Error("JWT payload is not an object!");
+      }
+    } catch (err) {
+      console.log("Invalid JWT!");
+    }
   }
 
-  try {
-    const payload = verify(jwt, PUBLIC_KEY, { algorithms: ["ES256"] });
-    if (typeof payload === "object") {
-      const { accountType, uid, email, name, verifiedEmail } = payload;
-      event.locals.currentUser = {
-        accountType,
-        uid,
-        email,
-        name,
-        verifiedEmail: verifiedEmail !== false,
-      };
-      // if (event.url.pathname.startsWith("/signup/email-verif")) {
-      //   if (verifiedEmail !== false) return Response.redirect(new URL("/", event.url), 303);
-      // } else if (verifiedEmail === false) {
-      //   return Response.redirect(new URL("/signup/email-verif", event.url), 303);
-      // }
-    } else throw new Error("JWT payload is not an object!");
-  } catch (err) {
-    console.log("Invalid JWT!");
-    console.log(err);
-  }
+  if (
+    !(event.locals.currentUser && event.locals.currentUser.accountType === "teacher") &&
+    event.url.pathname.startsWith("/teacher")
+  )
+    redirect(303, "/");
+
   return await resolve(event);
 };

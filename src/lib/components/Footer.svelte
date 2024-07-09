@@ -31,7 +31,7 @@
     ></path>
   </svg>
   <p>
-    Contactez-nous via <a href="mailto:exploranotes@gmail.com">exploranotes@gmail.com</a> !
+    Contactez-nous via <a href="mailto:contact@exploranotes.fr">contact@exploranotes.fr</a> !
   </p>
   <p>
     Ce site est open-source ! Son code est disponible sur&nbsp;

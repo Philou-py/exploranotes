@@ -9,9 +9,11 @@
   import DataTable from "components/DataTable.svelte";
   import { applyAction, enhance } from "$app/forms";
   import type { SubmitFunction } from "./signup/$types";
+  import { confirmation } from "components/ConfirmationModal.svelte";
 
   let showModal = false;
   let snackBarCount = 1;
+  let value = "hello";
 
   const handleSignOut: SubmitFunction =
     () =>
@@ -66,7 +68,19 @@
     <AccountCircle slot="append" />
     Hello, <strong>modal</strong>!</Button
   >
-  <Button variant="elevated" size="small" icon>
+  <Button
+    variant="elevated"
+    size="small"
+    icon
+    on:click={() => {
+      $confirmation = {
+        open: true,
+        message: "Êtes-vous sûr de vouloir poursuivre ?",
+        details: "Cette action est irréversible et changera définitivement la face du monde.",
+        callback: () => snackBars.haveASnack("Allons-y !"),
+      };
+    }}
+  >
     <AccountCircle />
   </Button>
   <Button
@@ -104,6 +118,7 @@
       placeholder="Hello, world!"
       required
       hint="Hello, world!"
+      bind:value={value}
     >
       <AccountCircle slot="prepend" />
     </TextField>

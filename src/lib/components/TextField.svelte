@@ -11,6 +11,7 @@
   export let placeholder = "";
   export let autocomplete = "off";
   export let disabled = false;
+  export let readonly = false;
   export let maxlength: number = 200;
   export let minlength: number | undefined = undefined;
   export let pattern: string | undefined = undefined;
@@ -59,6 +60,12 @@
     // Reset custom message for maxlength: the input will be valid if no other error is detected
     if (input) input.setCustomValidity("");
 
+    if (value) {
+      // Lift label when input is not empty, not only on focus
+      active = true;
+      dirty = true;
+    }
+
     // All variables should be figure for reactivity
     if (disabled) {
       state = "default";
@@ -99,7 +106,7 @@
   };
 </script>
 
-<div class="textField {state}" class:focused class:disabled>
+<div class="textField {state}" class:focused class:disabled={disabled || readonly}>
   <div class="prepend">
     <slot name="prepend" />
   </div>
@@ -124,6 +131,7 @@
       on:focus={handleFocus}
       on:blur={handleBlur}
       bind:this={input}
+      tabindex={readonly ? -1 : undefined}
     />
   </InputField>
 

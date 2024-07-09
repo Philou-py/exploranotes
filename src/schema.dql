@@ -6,6 +6,7 @@ name: string @index(fulltext) .
 verifiedEmail: bool @index(bool) .
 groups: [uid] @reverse .
 school: uid @reverse .
+pendingJoin: uid @reverse .
 evaluations: [uid] @reverse .
 evalTemplates: [uid] .
 copies: [uid] @reverse .
@@ -130,6 +131,7 @@ type Student {
   lastName
   name
   school
+  pendingJoin
   groups
   copies
   creationDate
@@ -143,6 +145,7 @@ type Teacher {
   lastName
   name
   school
+  pendingJoin
   evaluations
   evalTemplates
   creationDate

@@ -8,6 +8,7 @@
   export let label = "";
   export let items: [string, string][] = [];
   export let disabled = false;
+  export let readonly = false;
   export let required = false;
   export let focused = false;
   export let hint = "";
@@ -26,9 +27,12 @@
     focused = false;
     message = "";
   };
+
+  // Lift label when input is not empty, not only on focus
+  $: if (value) active = true;
 </script>
 
-<div class="textField" class:focused>
+<div class="textField" class:focused class:disabled={disabled || readonly}>
   <div class="prepend">
     <slot name="prepend" />
   </div>
@@ -45,6 +49,7 @@
       bind:value
       on:focus={handleFocus}
       on:blur={handleBlur}
+      tabindex={readonly ? -1 : undefined}
     >
       <option value="" hidden />
       {#each items as [val, text]}
@@ -89,6 +94,11 @@
       &:hover {
         color: darken($blue, 10%);
       }
+    }
+
+    &.disabled {
+      opacity: 0.6;
+      pointer-events: none;
     }
   }
 

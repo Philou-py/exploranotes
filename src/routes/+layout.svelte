@@ -3,6 +3,7 @@
   import NavBar from "components/NavBar.svelte";
   import Footer from "components/Footer.svelte";
   import SnackBars from "components/SnackBars.svelte";
+  import ConfirmationModal from "components/ConfirmationModal.svelte";
   import "./styles.scss";
   import "./typography.scss";
 
@@ -27,3 +28,4 @@
 </main>
 <Footer />
 <SnackBars />
+<ConfirmationModal />

@@ -62,6 +62,8 @@
     position: absolute;
     top: 0;
     left: 0;
+    /* Avoid a delay when clicking */
+    pointer-events: none;
     max-width: 100%;
     line-height: var(--contentHeight);
     white-space: nowrap;
