@@ -15,7 +15,7 @@ level: string @index(fulltext) .
 subject: string @index(fulltext) .
 marked: bool @index(bool) .
 primary: bool @index(bool) .
-city: string @index(fulltext) .
+address: string @index(fulltext) .
 academy: string @index(fulltext) .
 title: string @index(fulltext) .
 coefficient: float .
@@ -117,7 +117,7 @@ type Group {
 
 type School {
   name
-  city
+  address
   academy
   groups
   creationDate

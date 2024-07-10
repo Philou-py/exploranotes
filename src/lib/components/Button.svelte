@@ -25,15 +25,20 @@
   {disabled}
   {style}
 >
-  <div class="prepend">
-    <slot name="prepend" />
-  </div>
+  <!-- Without these conditions, .prepend and .append have a width because of their margin -->
+  {#if $$slots.prepend}
+    <div class="prepend">
+      <slot name="prepend" />
+    </div>
+  {/if}
   <div class="content">
     <slot />
   </div>
-  <div class="append">
-    <slot name="append" />
-  </div>
+  {#if $$slots.append}
+    <div class="append">
+      <slot name="append" />
+    </div>
+  {/if}
   <Ripple />
 </button>
 
@@ -47,7 +52,7 @@
     box-sizing: border-box;
     display: inline flex;
     position: relative;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     outline: none;
     border: 0;
@@ -105,6 +110,8 @@
 
   .block {
     display: flex;
+    /* By default, a button won't stretch */
+    width: 100%;
   }
 
   .filled:hover {
@@ -175,6 +182,7 @@
     border-radius: 50%;
     /* In case it is placed in a flex container */
     flex-shrink: 0;
+    justify-content: center;
   }
 
   .icon.small {

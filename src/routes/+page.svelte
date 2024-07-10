@@ -10,6 +10,7 @@
   import { applyAction, enhance } from "$app/forms";
   import type { SubmitFunction } from "./signup/$types";
   import { confirmation } from "components/ConfirmationModal.svelte";
+  import { goto } from "$app/navigation";
 
   let showModal = false;
   let snackBarCount = 1;
@@ -21,6 +22,7 @@
       switch (result.type) {
         case "success":
           snackBars.haveASnack(result.data!.message);
+          goto("/signout", { invalidateAll: true });
           break;
         default:
           await applyAction(result);
@@ -98,7 +100,7 @@
   >
     <AccountCircle />
   </Button>
-  <a href="https://svelte.dev">
+  <a href="/teacher">
     <Button
       variant="flat"
       size="large"
@@ -118,7 +120,7 @@
       placeholder="Hello, world!"
       required
       hint="Hello, world!"
-      bind:value={value}
+      bind:value
     >
       <AccountCircle slot="prepend" />
     </TextField>

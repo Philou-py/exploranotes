@@ -10,7 +10,7 @@ declare global {
         email: string;
         name: string;
         verifiedEmail: boolean;
-      } | null;
+      } | undefined;
     }
     // interface PageData {}
     // interface PageState {}

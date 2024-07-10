@@ -16,18 +16,18 @@
     loading = true;
     formData.set("sideBarOpen", window.matchMedia("(max-width: 960px)").matches ? "no" : "yes");
 
-    return ({ result }) => {
+    return async ({ result }) => {
       loading = false;
       switch (result.type) {
         case "success":
           snackBars.haveASnack(result.data!.message);
-          goto("/");
+          goto("/", { invalidateAll: true });
           break;
         case "failure":
           snackBars.haveASnack(result.data!.message, "error");
           break;
         default:
-          applyAction(result);
+          await applyAction(result);
       }
     };
   };

@@ -15,7 +15,7 @@ transporter.verify((error) => {
 });
 
 export const handle = async ({ event, resolve }) => {
-  event.locals.currentUser = null;
+  event.locals.currentUser = undefined;
   const jwt = event.cookies.get("Auth");
 
   if (jwt) {

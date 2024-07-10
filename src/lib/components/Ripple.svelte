@@ -71,7 +71,8 @@
   };
 </script>
 
-<div use:bindRipple />
+<!-- Prevent this div from having a box and taking part in a flex layout for example -->
+<div use:bindRipple style="display: contents" />
 
 <style>
   @keyframes -global-showRipple {

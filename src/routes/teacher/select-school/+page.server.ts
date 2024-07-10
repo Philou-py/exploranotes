@@ -12,10 +12,11 @@ const schoolsQuery = `
     schools(func: type(School)) {
       uid
       name
-      city
+      address
     }
 
-    user(func: uid($userUid)) @normalize {
+    users(func: uid($userUid)) @normalize {
+      uid
       pendingJoin {
         pendingJoin: uid
       }
@@ -26,18 +27,19 @@ const schoolsQuery = `
 interface School {
   uid: string;
   name: string;
-  city: string;
+  address: string;
 }
 
 export const load = async ({ locals }) => {
   const response = await db
     .newTxn()
     .queryWithVars(schoolsQuery, { $userUid: locals.currentUser!.uid });
-  const data: { schools: School[]; user: { pendingJoin?: string }[] } = response.getJson();
+  const { schools, users }: { schools: School[]; users: { pendingJoin?: string }[] } =
+    response.getJson();
 
   return {
-    schools: data.schools,
-    pendingSchool: data.schools.find(({ uid }) => uid === data.user[0].pendingJoin),
+    schools: schools,
+    pendingSchool: schools.find(({ uid }) => uid === users[0].pendingJoin),
   };
 };
 

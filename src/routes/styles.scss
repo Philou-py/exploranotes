@@ -41,6 +41,7 @@ $lg: 1904px;
   --creme-de-peche: #f5d6c6;
   --peach-pink: #fa9a85;
   --fruit-dove: #ce5b78;
+  --sweet-corn: #f0ead6;
 }
 
 $jesterRed: #9e1030;
@@ -133,7 +134,7 @@ a {
   .cardActions {
     justify-content: space-between;
 
-    button[type=submit] {
+    button[type="submit"] {
       margin-left: auto;
     }
   }

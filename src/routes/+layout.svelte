@@ -1,11 +1,15 @@
 <script>
-  import { onNavigate } from "$app/navigation";
-  import NavBar from "components/NavBar.svelte";
-  import Footer from "components/Footer.svelte";
-  import SnackBars from "components/SnackBars.svelte";
-  import ConfirmationModal from "components/ConfirmationModal.svelte";
   import "./styles.scss";
   import "./typography.scss";
+  import { onNavigate } from "$app/navigation";
+  import Navigation from "components/Navigation.svelte";
+  import Footer from "components/Footer.svelte";
+  import Button from "components/Button.svelte";
+  import ChevronDown from "svelte-material-icons/ChevronDown.svelte";
+  import SnackBars from "components/SnackBars.svelte";
+  import ConfirmationModal from "components/ConfirmationModal.svelte";
+  import { onMount } from "svelte";
+  import ButtonGroup from "components/ButtonGroup.svelte";
 
   onNavigate((navigation) => {
     // https://svelte.dev/blog/view-transitions
@@ -20,12 +24,54 @@
       });
     });
   });
+
+  export let data;
+  let sideBarOpen = data.sideBarOpen;
+  let lgScreen = true;
+
+  onMount(() => {
+    const mql = window.matchMedia("(max-width: 960px)");
+    if (!mql.matches) lgScreen = true;
+    mql.addEventListener("change", (event) => {
+      lgScreen = !event.matches;
+    });
+  });
 </script>
 
-<NavBar />
-<main>
+<Navigation currentUser={data.currentUser} bind:open={sideBarOpen} bind:clipped={lgScreen}>
+  <svelte:fragment slot="teacherMenu">
+    <ButtonGroup>
+      <Button
+        variant="text"
+        --primary="var(--princess-blue)"
+        block
+        slot="trigger"
+        let:toggle
+        on:click={toggle}
+      >
+        Mon établissement
+        <ChevronDown slot="append" />
+      </Button>
+      <Button variant="text" --primary="var(--turmeric)" block>Professeurs</Button>
+      <Button variant="text" --primary="var(--turmeric)" block>Élèves</Button>
+    </ButtonGroup>
+  </svelte:fragment>
+</Navigation>
+<main class:pushLeft={sideBarOpen && lgScreen}>
   <slot />
 </main>
 <Footer />
 <SnackBars />
 <ConfirmationModal />
+
+<style lang="scss">
+  $sideBarWidth: 270px;
+
+  main {
+    transition: margin-left 300ms;
+
+    &.pushLeft {
+      margin-left: $sideBarWidth;
+    }
+  }
+</style>

@@ -12,7 +12,7 @@
   export let autocomplete = "off";
   export let disabled = false;
   export let readonly = false;
-  export let maxlength: number = 200;
+  export let maxlength: number = 100;
   export let minlength: number | undefined = undefined;
   export let pattern: string | undefined = undefined;
   export let required = false;

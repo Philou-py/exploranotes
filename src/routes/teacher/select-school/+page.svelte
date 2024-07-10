@@ -11,12 +11,12 @@
   export let data;
   let loading = false;
   let selectedUid = data.pendingSchool?.uid || "";
+  let pendingSchool = data.schools.find(({ uid }) => uid === selectedUid);
 
   const handleSelectSchool: SubmitFunction = () => {
     loading = true;
 
     return async ({ result }) => {
-      loading = false;
       switch (result.type) {
         case "success":
           snackBars.haveASnack(result.data!.message);
@@ -27,6 +27,7 @@
         default:
           await applyAction(result);
       }
+      loading = false;
     };
   };
 </script>
@@ -35,11 +36,10 @@
   <header>
     <h2 class="cardTitle">Rejoindre un établissement</h2>
   </header>
-  {#if data.pendingSchool}
+  {#if pendingSchool}
     <p style="text-align: center">
-      Vous avez effectué la demande de rejoindre {data.pendingSchool.name} à {data.pendingSchool
-        .city}. Si les administrateurs n&rsquo;ont pas reçu d&rsquo;email, vous pouvez toujours
-      réessayer.
+      Vous avez effectué la demande de rejoindre {pendingSchool.name}, {pendingSchool.address}. Si
+      les administrateurs n&rsquo;ont pas reçu d&rsquo;email, vous pouvez toujours réessayer.
     </p>
   {:else}
     <p style="text-align: center">
@@ -50,7 +50,7 @@
     <Select
       label="Établissement"
       name="schoolUid"
-      items={data.schools.map(({ uid, name, city }) => [uid, `${name} à ${city}`])}
+      items={data.schools.map(({ uid, name, address }) => [uid, `${name}, ${address}`])}
       bind:value={selectedUid}
       readonly={!!data.pendingSchool}
       required
@@ -58,10 +58,12 @@
       <School slot="prepend" />
     </Select>
     <div class="cardActions">
-      <a href="/teacher/school-creation" tabindex="-1">
-        <Button variant="text">Nouvel établissement</Button>
-      </a>
-      <Button formSubmit {loading} --primary={lighten("var(--fruit-dove)", 0)} --secondary="white">
+      {#if !data.pendingSchool}
+        <a href="/teacher/new-school" tabindex="-1">
+          <Button variant="text">Nouvel établissement</Button>
+        </a>
+      {/if}
+      <Button formSubmit {loading} --primary="var(--fruit-dove)" --secondary="white">
         Valider
         <Send slot="append" />
       </Button>

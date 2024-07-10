@@ -29,7 +29,13 @@ export const actions = {
         expiresIn: "1y",
       });
 
-      locals.currentUser = { accountType, uid, email, name, verifiedEmail: true };
+      locals.currentUser = {
+        accountType,
+        uid,
+        email,
+        name,
+        verifiedEmail: true,
+      };
 
       cookies.set("Auth", newJWT, {
         path: "/",

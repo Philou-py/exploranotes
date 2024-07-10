@@ -90,6 +90,6 @@ export const actions = {
       secure: true,
     });
 
-    return { message: `Content de vous revoir, ${user.email} !` };
+    return { message: `Content de vous revoir, ${currentUser.name} !` };
   },
 };

@@ -15,7 +15,7 @@
       switch (result.type) {
         case "success":
           snackBars.haveASnack(result.data!.message);
-          goto("/");
+          goto("/", { invalidateAll: true });
           break;
         case "failure":
           snackBars.haveASnack(result.data!.message, "error");
