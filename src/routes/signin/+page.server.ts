@@ -7,13 +7,13 @@ import jwt from "jsonwebtoken";
 const { sign } = jwt;
 
 export const load = ({ locals }) => {
-  if (locals.currentUser) redirect(303, "/");
+  if (locals.currentUser.isAuthenticated) redirect(303, "/");
 };
 
 const User = z.object({
   email: z.string().email(),
   password: z.string().min(7),
-  sideBarOpen: z.literal("yes").or(z.literal("no")),
+  largeScreen: z.literal("yes").or(z.literal("no")),
 });
 
 const pwdQuery = `
@@ -39,7 +39,7 @@ export const actions = {
     } = User.safeParse({
       email: formData.get("email"),
       password: formData.get("password"),
-      sideBarOpen: formData.get("sideBarOpen"),
+      largeScreen: formData.get("largeScreen"),
     });
 
     if (!success) {
@@ -53,7 +53,7 @@ export const actions = {
     const { users } = queryRes.getJson();
 
     if (users.length === 0 || users[0].validPwd === false) {
-      return fail(403, { message: "L'adresse email ou le mot de passe sont incorrects !" });
+      return fail(403, { message: "L'adresse électronique ou le mot de passe sont incorrects !" });
     }
 
     let currentUser = {
@@ -62,6 +62,8 @@ export const actions = {
       email: users[0].email,
       name: users[0].name,
       verifiedEmail: !!users[0].verifiedEmail,
+      school: { uid: "", name: "" },
+      isAuthenticated: true,
     };
 
     locals.currentUser = currentUser;
@@ -82,7 +84,15 @@ export const actions = {
       secure: true,
     });
 
-    cookies.set("SBOpen", user.sideBarOpen, {
+    cookies.set("LGScreen", user.largeScreen, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+      httpOnly: false,
+      secure: true,
+    });
+
+    cookies.set("SBOpen", user.largeScreen, {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
       sameSite: "lax",

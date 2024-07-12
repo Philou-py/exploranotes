@@ -14,7 +14,8 @@
   };
 
   // An element will not focus if it is not visible.
-  $: if (show) bgElt.addEventListener("transitionend", () => bgElt.focus(), { once: true });
+  $: if (show && bgElt)
+    bgElt.addEventListener("transitionend", () => bgElt.focus(), { once: true });
 </script>
 
 <div
@@ -53,6 +54,7 @@
   }
 
   .modal {
+    width: var(--width);
     max-width: 95%;
     max-height: 95%;
     overflow: auto;

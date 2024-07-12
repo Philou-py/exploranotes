@@ -79,7 +79,7 @@
         open: true,
         message: "Êtes-vous sûr de vouloir poursuivre ?",
         details: "Cette action est irréversible et changera définitivement la face du monde.",
-        callback: () => snackBars.haveASnack("Allons-y !"),
+        onConfirm: () => snackBars.haveASnack("Allons-y !"),
       };
     }}
   >

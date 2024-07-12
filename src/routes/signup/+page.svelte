@@ -18,7 +18,7 @@
 
   const handleSubmit: SubmitFunction = ({ formData }) => {
     loading = true;
-    formData.set("sideBarOpen", window.matchMedia("(max-width: 960px)").matches ? "no" : "yes");
+    formData.set("largeScreen", window.matchMedia("(max-width: 960px)").matches ? "no" : "yes");
 
     return async ({ result }) => {
       loading = false;
@@ -56,7 +56,7 @@
           checked={accountType === "student"}
           on:change={() => (accountType = "student")}
         />
-        <label for="student">Étudiant</label>
+        <label for="student">Élève</label>
         <input
           type="radio"
           name="accountType"
@@ -69,7 +69,7 @@
       </div>
     </div>
 
-    <TextField type="email" name="email" autocomplete="email" label="Adresse email" required>
+    <TextField type="email" name="email" autocomplete="email" label="Adresse électronique" required>
       <AccountCircle slot="prepend" />
     </TextField>
     <TextField

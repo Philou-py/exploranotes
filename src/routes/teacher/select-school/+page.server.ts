@@ -33,7 +33,7 @@ interface School {
 export const load = async ({ locals }) => {
   const response = await db
     .newTxn()
-    .queryWithVars(schoolsQuery, { $userUid: locals.currentUser!.uid });
+    .queryWithVars(schoolsQuery, { $userUid: locals.currentUser.uid });
   const { schools, users }: { schools: School[]; users: { pendingJoin?: string }[] } =
     response.getJson();
 
@@ -56,7 +56,7 @@ const queryAdmin = `
 
 export const actions = {
   default: async ({ request, locals }) => {
-    const { uid, email, name } = locals.currentUser!;
+    const { uid, email, name } = locals.currentUser;
     const formData = await request.formData();
     const schoolUid = formData.get("schoolUid");
     if (!schoolUid || typeof schoolUid !== "string")
@@ -80,7 +80,7 @@ export const actions = {
           Bonjour ${adminName},
         </p>
         <p>
-          ${name} souhaite rejoindre votre établissement. Son adresse email est ${email}.
+          ${name} souhaite rejoindre votre établissement. Son adresse électronique est ${email}.
         </p>
         <p>
           Si vous reconnaissez cet utilisateur, vous pouvez <a href="${acceptURL}">accepter sa demande</a>.

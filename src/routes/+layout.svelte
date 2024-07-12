@@ -10,6 +10,7 @@
   import ConfirmationModal from "components/ConfirmationModal.svelte";
   import { onMount } from "svelte";
   import ButtonGroup from "components/ButtonGroup.svelte";
+  import Cookies from "js-cookie";
 
   onNavigate((navigation) => {
     // https://svelte.dev/blog/view-transitions
@@ -27,20 +28,27 @@
 
   export let data;
   let sideBarOpen = data.sideBarOpen;
-  let lgScreen = true;
+  let lgScreen = data.largeScreen;
 
   onMount(() => {
     const mql = window.matchMedia("(max-width: 960px)");
     if (!mql.matches) lgScreen = true;
     mql.addEventListener("change", (event) => {
       lgScreen = !event.matches;
+      Cookies.set("LGScreen", lgScreen ? "yes" : "no");
+      if (!lgScreen) Cookies.set("SBOpen", "no");
     });
   });
 </script>
 
 <Navigation currentUser={data.currentUser} bind:open={sideBarOpen} bind:clipped={lgScreen}>
   <svelte:fragment slot="teacherMenu">
-    <ButtonGroup>
+    <ButtonGroup
+      links={[
+        ["/teacher/teachers", "Professeurs"],
+        ["/teacher/students", "Élèves"],
+      ]}
+    >
       <Button
         variant="text"
         --primary="var(--princess-blue)"
@@ -52,8 +60,7 @@
         Mon établissement
         <ChevronDown slot="append" />
       </Button>
-      <Button variant="text" --primary="var(--turmeric)" block>Professeurs</Button>
-      <Button variant="text" --primary="var(--turmeric)" block>Élèves</Button>
+      <Button slot="btn" let:text variant="text" --primary="var(--turmeric)" block>{text}</Button>
     </ButtonGroup>
   </svelte:fragment>
 </Navigation>

@@ -5,8 +5,8 @@
     open: boolean;
     message: string;
     details: string;
-    callback: () => void;
-  }> = writable({ open: false, message: "", details: "", callback: () => {} });
+    onConfirm: () => void;
+  }> = writable({ open: false, message: "", details: "", onConfirm: () => {} });
 </script>
 
 <script lang="ts">
@@ -17,16 +17,15 @@
 </script>
 
 <Modal bind:show={$confirmation.open}>
-  <div class="card">
+  <div class="card" style="padding: 1.5em;">
     <header>
       <h3 class="cardTitle">{$confirmation.message}</h3>
     </header>
     <p>{$confirmation.details}</p>
-    <div class="cardActions" style="justify-content: center">
+    <div class="cardActions">
       <Button
         variant="outlined"
         --primary="var(--jester-red)"
-        style="margin-right: 0.6em"
         on:click={() => {
           $confirmation.open = false;
         }}
@@ -39,7 +38,7 @@
         --primary="var(--princess-blue)"
         --secondary="white"
         on:click={() => {
-          $confirmation.callback();
+          $confirmation.onConfirm();
           $confirmation.open = false;
         }}
       >

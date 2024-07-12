@@ -6,11 +6,11 @@
   import Avatar from "./Avatar.svelte";
   import Cookies from "js-cookie";
 
-  interface CurrentUser {
-    accountType: "teacher" | "student";
-    name: string;
-  }
-  export let currentUser: CurrentUser | undefined = undefined;
+  export let currentUser = {
+    accountType: "teacher" as "teacher" | "student",
+    name: "",
+    isAuthenticated: false,
+  };
   export let clipped = false;
   export let open = false;
   let bgElt: HTMLDivElement;
@@ -31,7 +31,7 @@
 </script>
 
 <nav class="navBar container">
-  {#if currentUser}
+  {#if currentUser.isAuthenticated}
     <Button
       variant="flat"
       --primary="var(--jester-red)"
@@ -48,7 +48,7 @@
     <h4 class="exploraNotes">ExploraNotes</h4>
   </a>
   <div class="links">
-    {#if currentUser}
+    {#if currentUser.isAuthenticated}
       {#if clipped}
         <Avatar name={currentUser.name} />
       {/if}
@@ -73,12 +73,8 @@
   role="presentation"
 >
   <div class="sideBarContent">
-    <Avatar
-      name={currentUser?.name || ""}
-      style="margin: 0 auto 30px; font-size: 30px;"
-      --size="150px"
-    />
-    {#if currentUser?.accountType === "teacher"}
+    <Avatar name={currentUser.name} style="margin: 0 auto 30px; font-size: 30px;" --size="150px" />
+    {#if currentUser.accountType === "teacher"}
       <slot name="teacherMenu" />
     {:else}
       <slot name="studentMenu" />
@@ -127,11 +123,11 @@
 
   .links {
     margin-left: auto;
+  }
 
-    & > a {
-      text-decoration: none;
-      color: inherit;
-    }
+  :global(.navBar a, .sideBarContent a) {
+    text-decoration: none;
+    color: inherit;
   }
 
   .sideBarWrapper {

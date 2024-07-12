@@ -10,6 +10,7 @@
   export let formSubmit = false;
   export let loading = false;
   export let style = "";
+  export let tabindex: number | undefined = undefined;
   let className = "";
   export { className as class };
 </script>
@@ -24,6 +25,7 @@
   on:click
   {disabled}
   {style}
+  {tabindex}
 >
   <!-- Without these conditions, .prepend and .append have a width because of their margin -->
   {#if $$slots.prepend}
@@ -85,7 +87,6 @@
   }
 
   button:hover {
-    text-decoration: none;
     background-color: color-mix(in srgb, var(--c1) 90%, var(--c2));
   }
 
@@ -199,6 +200,7 @@
       width: 2.7em;
       min-width: initial;
       border-radius: 50%;
+      justify-content: center;
       /* In case it is placed in a flex container */
       flex-shrink: 0;
     }

@@ -35,7 +35,7 @@
 
 <div class="card formCard" style:--bg-colour={lighten("var(--peach-pink)", 70)}>
   <header>
-    <h3 class="cardTitle">Créer un établissement</h3>
+    <h2 class="cardTitle">Créer un établissement</h2>
   </header>
   <p style="text-align: center">
     Vous en deviendrez un administrateur, en charge de traiter les demandes, qui vous parviendront

@@ -17,7 +17,7 @@ const NewSchool = z.object({
 
 export const actions = {
   default: async ({ request, locals }) => {
-    const { uid } = locals.currentUser!;
+    const { uid } = locals.currentUser;
     const formData = await request.formData();
     const {
       success,

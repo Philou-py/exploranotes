@@ -2,7 +2,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import sendVerifEmail from "../sendVerifEmail.js";
 
 export const load = ({ locals }) => {
-  if (!locals.currentUser) redirect(303, "/");
+  if (!locals.currentUser.isAuthenticated) redirect(303, "/");
 
   return {
     email: locals.currentUser.email,

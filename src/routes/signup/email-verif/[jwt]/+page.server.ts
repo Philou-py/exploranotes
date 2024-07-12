@@ -35,6 +35,8 @@ export const actions = {
         email,
         name,
         verifiedEmail: true,
+        school: { uid: "", name: "" },
+        isAuthenticated: true,
       };
 
       cookies.set("Auth", newJWT, {
@@ -46,8 +48,16 @@ export const actions = {
       });
 
       const formData = await request.formData();
-      const sideBarOpen = formData.get("sideBarOpen") === "yes" ? "yes" : "no";
-      cookies.set("SBOpen", sideBarOpen, {
+      const largeScreen = formData.get("largeScreen") === "yes" ? "yes" : "no";
+      cookies.set("LGScreen", largeScreen, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+        httpOnly: false,
+        secure: true,
+      });
+
+      cookies.set("SBOpen", largeScreen, {
         path: "/",
         maxAge: 60 * 60 * 24 * 365,
         sameSite: "lax",

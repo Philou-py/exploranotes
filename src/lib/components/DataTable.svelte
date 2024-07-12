@@ -1,22 +1,22 @@
 <script lang="ts" context="module">
   export interface TableHeader<TableItem> {
     text: string;
-    value: keyof Omit<TableItem, "key">;
+    value: keyof Omit<TableItem, "key"> | "actions";
     noSorting?: boolean;
     align?: "start" | "center" | "end";
   }
 </script>
 
 <script lang="ts" generics="TableItem extends { key: number | string }">
-  import { flip } from "svelte/animate";
-
   import ArrowUp from "svelte-material-icons/ArrowUp.svelte";
+
   export let headers: TableHeader<TableItem>[];
   export let items: TableItem[];
   export let lineNumbering = false;
   export let sortBy: keyof TableItem = "key";
   export let sortByDefault: keyof TableItem = "key";
   export let sortOrder: "ASC" | "DESC" = "ASC";
+  export let emptyText = "Pas de données !";
 
   const handleToggleSort = (field: keyof TableItem) => {
     if (sortBy === field) {
@@ -55,7 +55,7 @@
             class:activeSort={sortBy === value}
             class:noSorting
             on:click={() => {
-              if (!noSorting) handleToggleSort(value);
+              if (!noSorting && value !== "actions") handleToggleSort(value);
             }}
           >
             {text}
@@ -71,7 +71,7 @@
     <tbody>
       {#if items.length === 0}
         <tr>
-          <td colSpan={headers.length + (lineNumbering ? 1 : 0)} class="noData"></td>
+          <td colSpan={headers.length + (lineNumbering ? 1 : 0)} class="noData">{emptyText}</td>
         </tr>
       {:else}
         {#each items as item, lineNumber (item.key)}
@@ -98,15 +98,14 @@
   }
 
   .noData {
-    font-weight: bold;
+    font-weight: 500;
     text-align: center;
     padding: 10px 0;
-    font-size: 20px;
   }
 
   :global(.start) {
     text-align: start;
-    justify-content: flex-start;
+    justify-content: start;
   }
 
   :global(.center) {
@@ -116,7 +115,7 @@
 
   :global(.end) {
     text-align: end;
-    justify-content: flex-end;
+    justify-content: end;
   }
 
   :global(tr) {
@@ -145,6 +144,17 @@
     transition: background-color ease 80ms;
     overflow: hidden;
     white-space: nowrap;
+  }
+
+  :global(td.breakAll) {
+    word-break: break-all;
+  }
+
+  @media (max-width: 1264px) {
+    th,
+    :global(td) {
+      white-space: wrap;
+    }
   }
 
   :global(.sortIcon) {

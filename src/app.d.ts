@@ -10,7 +10,12 @@ declare global {
         email: string;
         name: string;
         verifiedEmail: boolean;
-      } | undefined;
+        school: {
+          uid: string;
+          name: string;
+        };
+        isAuthenticated: boolean;
+      };
     }
     // interface PageData {}
     // interface PageState {}

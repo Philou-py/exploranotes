@@ -14,7 +14,7 @@
 
   const handleSignIn: SubmitFunction = ({ formData }) => {
     loading = true;
-    formData.set("sideBarOpen", window.matchMedia("(max-width: 960px)").matches ? "no" : "yes");
+    formData.set("largeScreen", window.matchMedia("(max-width: 960px)").matches ? "no" : "yes");
 
     return async ({ result }) => {
       loading = false;
@@ -38,7 +38,7 @@
     <h2 class="cardTitle">Connexion</h2>
   </header>
   <form method="POST" use:enhance={handleSignIn}>
-    <TextField type="email" name="email" autocomplete="email" label="Adresse email" required>
+    <TextField type="email" name="email" autocomplete="email" label="Adresse électronique" required>
       <AccountCircle slot="prepend" />
     </TextField>
     <TextField

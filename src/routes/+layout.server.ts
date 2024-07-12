@@ -1,4 +1,5 @@
 export const load = ({ locals, cookies }) => {
   const sideBarOpen = cookies.get("SBOpen") === "yes";
-  return { currentUser: locals.currentUser, sideBarOpen };
+  const largeScreen = cookies.get("LGScreen") === "yes";
+  return { currentUser: locals.currentUser, sideBarOpen, largeScreen };
 };

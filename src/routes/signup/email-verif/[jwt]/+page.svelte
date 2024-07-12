@@ -9,7 +9,7 @@
 
   const handleSubmit: SubmitFunction = ({ formData }) => {
     loading = true;
-    formData.set("sideBarOpen", window.matchMedia("(max-width: 960px)").matches ? "no" : "yes");
+    formData.set("largeScreen", window.matchMedia("(max-width: 960px)").matches ? "no" : "yes");
     return async ({ result }) => {
       loading = false;
       switch (result.type) {

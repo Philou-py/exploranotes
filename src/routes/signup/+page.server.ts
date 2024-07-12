@@ -10,7 +10,7 @@ import sendVerifEmail from "./sendVerifEmail.js";
 const { sign } = jwt;
 
 export const load = ({ locals }) => {
-  if (locals.currentUser) redirect(303, "/");
+  if (locals.currentUser.isAuthenticated) redirect(303, "/");
 };
 
 const emailQuery = `
@@ -27,7 +27,7 @@ const NewUser = z.object({
   lastName: z.string(),
   email: z.string().email(),
   password: z.string().min(7),
-  sideBarOpen: z.literal("yes").or(z.literal("no")),
+  largeScreen: z.literal("yes").or(z.literal("no")),
 });
 
 export const actions = {
@@ -43,7 +43,7 @@ export const actions = {
       lastName: data.get("lastName"),
       email: data.get("email"),
       password: data.get("password"),
-      sideBarOpen: data.get("sideBarOpen"),
+      largeScreen: data.get("largeScreen"),
     });
 
     if (!success) {
@@ -57,7 +57,7 @@ export const actions = {
     const { users } = queryRes.getJson();
     if (users.length > 0) {
       console.log(users);
-      return fail(400, { message: "Cette adresse email est déjà utilisée !" });
+      return fail(400, { message: "Cette adresse électronique est déjà utilisée !" });
     }
 
     const txn = db.newTxn();
@@ -85,6 +85,8 @@ export const actions = {
       email: newUser.email,
       name,
       verifiedEmail: false,
+      school: { uid: "", name: "" },
+      isAuthenticated: true,
     };
     locals.currentUser = currentUser;
 
@@ -104,7 +106,15 @@ export const actions = {
       secure: true,
     });
 
-    cookies.set("SBOpen", newUser.sideBarOpen, {
+    cookies.set("LGScreen", newUser.largeScreen, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 30,
+      sameSite: "lax",
+      httpOnly: false,
+      secure: true,
+    });
+
+    cookies.set("SBOpen", newUser.largeScreen, {
       path: "/",
       maxAge: 60 * 60 * 24 * 30,
       sameSite: "lax",

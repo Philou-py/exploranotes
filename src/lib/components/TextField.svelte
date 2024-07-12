@@ -3,6 +3,7 @@
   import InputField from "./InputField.svelte";
   import { slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+    import {tick} from "svelte";
 
   export let type: "text" | "email" | "password" | "date" | "url" = "text";
   export let value = "";
@@ -25,7 +26,7 @@
     TOO_SHORT: `Longueur min : ${minlength}`,
     TYPE_MISMATCH:
       type === "email"
-        ? "Email invalide"
+        ? "Mél invalide"
         : type === "url"
           ? "URL invalide"
           : type === "date"
@@ -56,7 +57,10 @@
     if (state === "default" || state === "valid") message = "";
   };
 
-  $: {
+  $: (async () => {
+    // Ensure 'input.validity' is always in sync with the props
+    await tick();
+
     // Reset custom message for maxlength: the input will be valid if no other error is detected
     if (input) input.setCustomValidity("");
 
@@ -67,11 +71,10 @@
     }
 
     // All variables should be figure for reactivity
+    // A disabled element does not participe in contraint validation
     if (disabled) {
       state = "default";
       message = "";
-      // Resetting 'value' is necessary, as when toggling props, 'input.validity'
-      // does not take into account the new prop.
       value = "";
       dirty = false;
       handleBlur();
@@ -79,7 +82,8 @@
       // maxlength is not placed on the input to allow the user to continue typing
       // even past the limit
       if (input.validity.valid && !(value.length > maxlength)) {
-        state = "valid";
+        if (!required && value === "") state = "default";
+        else state = "valid";
         message = hint;
       } else {
         if (required && input.validity.valueMissing) {
@@ -96,7 +100,7 @@
         }
       }
     }
-  }
+  })()
 
   // Binding 'value' on the input is not allowed when 'type' is variable
   const handleInput: FormEventHandler<HTMLInputElement> = (event) => {
@@ -166,6 +170,8 @@
   .textField {
     display: grid;
     color: rgb(0 0 0 / 0.7);
+    /* If in a flex container, grow by default */
+    flex-grow: 1;
     grid-template-areas:
       "prepend field append"
       ". hints hints";
