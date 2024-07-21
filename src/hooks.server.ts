@@ -17,7 +17,6 @@ transporter.verify((error) => {
 
 interface SchoolQuery {
   users: {
-    uid: string;
     school?: {
       uid: string;
       name: string;
@@ -25,12 +24,9 @@ interface SchoolQuery {
   }[];
 }
 
-// Including the first 'uid' field is necessary to avoid receiving an
-// empty array when 'school' is not present
 const schoolQuery = `
   query SchoolQuery($userUid: string) {
     users(func: uid($userUid)) {
-      uid
       school {
         uid
         name
@@ -83,12 +79,10 @@ export const handle = async ({ event, resolve }) => {
       const response = await db
         .newTxn()
         .queryWithVars(schoolQuery, { $userUid: locals.currentUser.uid });
-      const {
-        users: [teacher],
-      }: SchoolQuery = response.getJson();
+      const { users: teachers }: SchoolQuery = response.getJson();
 
-      if (!teacher.school) redirect(303, "/teacher/select-school");
-      locals.currentUser.school = teacher.school;
+      if (teachers.length === 0 || !teachers[0].school) redirect(303, "/teacher/select-school");
+      locals.currentUser.school = teachers[0].school;
     }
   }
 

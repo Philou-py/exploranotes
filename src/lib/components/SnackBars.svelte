@@ -19,14 +19,15 @@
     haveASnack: (
       message: string,
       type: "info" | "success" | "error" = "success",
-      duration: number = 5000,
+      duration: number | undefined = undefined,
       dismissable: boolean = true,
     ) => {
       // currentId captures id by value, which retains the original id
       // when passed to the setTimeout callback.
       const currentId = id++;
       update((bars) => [...bars, { id: currentId, message, type, dismissable }]);
-      if (duration !== 0) setTimeout(() => endASnack(currentId), duration);
+      if (duration !== 0)
+        setTimeout(() => endASnack(currentId), duration || (type === "error" ? 6000 : 4000));
     },
   };
 </script>

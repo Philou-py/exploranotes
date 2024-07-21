@@ -131,7 +131,6 @@ type Student {
   lastName
   name
   school
-  pendingJoin
   groups
   copies
   creationDate

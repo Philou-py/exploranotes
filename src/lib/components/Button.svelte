@@ -9,6 +9,7 @@
   export let shrinkToIcon = false;
   export let formSubmit = false;
   export let loading = false;
+  export let title = "";
   export let style = "";
   export let tabindex: number | undefined = undefined;
   let className = "";
@@ -24,6 +25,7 @@
   class:shrinkToIcon
   on:click
   {disabled}
+  {title}
   {style}
   {tabindex}
 >
@@ -177,7 +179,7 @@
   .icon {
     width: 2.5em;
     height: 2.5em;
-    font-size: 0.9em;
+    font-size: 0.75em;
     padding: 0;
     min-width: initial;
     border-radius: 50%;
@@ -187,11 +189,11 @@
   }
 
   .icon.small {
-    font-size: 0.75em;
+    font-size: 0.6em;
   }
 
   .icon.large {
-    font-size: 1.25em;
+    font-size: 0.9em;
   }
 
   @media (max-width: 960px) {

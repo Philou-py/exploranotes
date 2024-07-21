@@ -20,7 +20,7 @@ export const transporter = createTransport({
   },
 });
 
-export const createEmail = (content: string) => {
+export const createEmail = (content: string, salutation = "À bientôt !") => {
   return `
     <!doctype html>
     <html lang="en">
@@ -30,9 +30,7 @@ export const createEmail = (content: string) => {
       </head>
       <body>
         ${content}
-        <p>
-          À bientôt !
-        </p>
+        <p>${salutation}</p>
       </body>
     </html>
   `;

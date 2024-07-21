@@ -1,11 +1,8 @@
-<script lang="ts" context="module">
-</script>
-
 <script lang="ts">
   import DataTable from "components/DataTable.svelte";
   import Button from "components/Button.svelte";
   import Plus from "svelte-material-icons/Plus.svelte";
-  import Delete from "svelte-material-icons/Delete.svelte";
+  import Delete from "svelte-material-icons/DeleteOutline.svelte";
   import Check from "svelte-material-icons/Check.svelte";
   import Close from "svelte-material-icons/Close.svelte";
   import Face from "svelte-material-icons/FaceManOutline.svelte";
@@ -77,7 +74,7 @@
     </header>
 
     <form method="POST" action="?/addStudents" use:enhance={handleSubmitStudents} bind:this={form}>
-      {#each newStudentIds as id (id)}
+      {#each newStudentIds as id, i (id)}
         <section class="group" transition:slide>
           <div class="newStudent">
             <div class="textFields">
@@ -101,10 +98,8 @@
               size="small"
               tabindex={-1}
               --primary="var(--jester-red)"
-              on:click={() => {
-                if (newStudentIds.length > 1)
-                  newStudentIds = newStudentIds.filter((stId) => stId !== id);
-              }}
+              disabled={newStudentIds.length === 1}
+              on:click={() => (newStudentIds = newStudentIds.filter((stId) => stId !== id))}
               icon
             >
               <Delete />
@@ -136,7 +131,12 @@
 
           <p class="center">
             En revanche, si une adresse électronique correspond à celle d&rsquo;un élève sans
-            établissement, celui-ci sera affecté au vôtre.
+            établissement, celui-ci sera affecté au vôtre et son nom sera modifié.
+          </p>
+
+          <p class="center">
+            Si vous tentez d&rsquo;ajouter plusieurs élèves avec le même nom et sans adresse
+            électronique, seulement l&rsquo;un d&rsquo;entre eux sera pris en compte.
           </p>
 
           <p class="center">
@@ -151,15 +151,16 @@
               { value: "existingAccount", text: "Compte existant" },
               { value: "schoolStatus", text: "Établissement" },
               { value: "isTeacher", text: "Professeur" },
+              { value: "duplicate", text: "Doublon" },
             ]}
             items={summaryItems}
             lineNumbering
           >
             <tr
               slot="item"
-              let:item={{ name, email, existingAccount, schoolStatus, isTeacher }}
+              let:item={{ name, email, existingAccount, schoolStatus, isTeacher, duplicate }}
               let:lineNumber
-              class:highlight={schoolStatus !== "none" || isTeacher}
+              class:highlight={schoolStatus !== "none" || isTeacher || duplicate}
             >
               <td class="center">{lineNumber}</td>
               <td>{name}</td>
@@ -182,6 +183,13 @@
               </td>
               <td>
                 {#if isTeacher}
+                  <span class="bad"><Check /></span>
+                {:else}
+                  <Close />
+                {/if}
+              </td>
+              <td>
+                {#if duplicate}
                   <span class="bad"><Check /></span>
                 {:else}
                   <Close />

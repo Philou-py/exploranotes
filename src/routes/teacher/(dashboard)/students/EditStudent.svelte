@@ -12,11 +12,20 @@
   import { invalidate } from "$app/navigation";
 
   export let modalOpen = false;
-  export let student: { uid: string; firstName: string; lastName: string; email: string };
+  export let student: {
+    uid: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    hasAccount: boolean;
+  };
   let loading = false;
 
-  const handleEditStudent: SubmitFunction<EditStudentReturn, { message: string }> = () => {
+  const handleEditStudent: SubmitFunction<EditStudentReturn, { message: string }> = ({
+    formData,
+  }) => {
     loading = true;
+    if (student.hasAccount) formData.set("email", "");
 
     return async ({ result }) => {
       switch (result.type) {
@@ -57,11 +66,20 @@
         name="email"
         label="Adresse électronique"
         value={student.email}
-        readonly
+        hint="Laisser vide si inconnue"
+        readonly={student.hasAccount}
       >
         <AccountCircle slot="prepend" />
       </TextField>
       <input type="hidden" name="uid" value={student.uid} />
+
+      {#if !student.hasAccount}
+        <p class="center">
+          Si vous connaissez l&rsquo;adresse électronique de l&rsquo;élève en question et que vous
+          l&rsquo;inscrivez ici, un compte utilisant cette adresse aura directement accès à
+          l&rsquo;établissement et à ses données crées par les professeurs.
+        </p>
+      {/if}
 
       <div class="cardActions">
         <Button variant="text" --primary="var(--jester-red)" on:click={() => (modalOpen = false)}>

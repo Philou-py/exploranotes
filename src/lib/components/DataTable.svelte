@@ -110,7 +110,6 @@
 
   :global(.center) {
     text-align: center;
-    justify-content: center;
   }
 
   :global(.end) {
