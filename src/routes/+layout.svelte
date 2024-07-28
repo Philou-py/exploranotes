@@ -64,10 +64,12 @@
     </ButtonGroup>
   </svelte:fragment>
 </Navigation>
+
 <main class:pushLeft={sideBarOpen && lgScreen}>
   <slot />
+  <Footer />
 </main>
-<Footer />
+
 <SnackBars />
 <ConfirmationModal />
 

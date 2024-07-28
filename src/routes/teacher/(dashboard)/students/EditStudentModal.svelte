@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { SubmitFunction } from "@sveltejs/kit";
-  import type { EditStudentReturn } from "./+page.server";
+  import type { MsgReturn } from "./+page.server";
   import Modal from "components/Modal.svelte";
   import Button from "components/Button.svelte";
   import TextField from "components/TextField.svelte";
@@ -21,16 +21,14 @@
   };
   let loading = false;
 
-  const handleEditStudent: SubmitFunction<EditStudentReturn, { message: string }> = ({
-    formData,
-  }) => {
+  const handleEditStudent: SubmitFunction = ({ formData }) => {
     loading = true;
     if (student.hasAccount) formData.set("email", "");
 
     return async ({ result }) => {
       switch (result.type) {
         case "success":
-          snackBars.haveASnack(result.data!.message!);
+          snackBars.haveASnack(result.data!.message);
           invalidate("app:students");
           modalOpen = false;
           break;

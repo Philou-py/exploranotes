@@ -42,10 +42,18 @@
   </p>
 </footer>
 
-<style>
+<style lang="scss">
+  $navBarHeight: 60px;
+
   /* https://css-tricks.com/a-clever-sticky-footer-technique/ */
   :global(html, body) {
     height: 100%;
+  }
+
+  :global(main) {
+    /* Prevent title margins from intervening with layout */
+    display: flow-root;
+    height: calc(100% - $navBarHeight);
   }
 
   footer {

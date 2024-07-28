@@ -2,6 +2,7 @@
   export let checked = false;
   export let disabled = false;
   export let name = "";
+  export let value = "yes";
   export let title = "";
   export let style = "";
   let className = "";
@@ -10,7 +11,7 @@
 
 <label {title}>
   <slot name="left" />
-  <input type="checkbox" bind:checked {disabled} {name} {style} class={className} />
+  <input type="checkbox" bind:checked bind:value {disabled} {name} {style} class={className} />
   <slot name="right" />
 </label>
 

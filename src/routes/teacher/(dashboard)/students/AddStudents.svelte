@@ -45,6 +45,7 @@
             snackBars.haveASnack(result.data!.message);
             invalidate("app:students");
             modalOpen = false;
+            setTimeout(() => form.reset(), 300);
           }
           break;
         case "failure":
@@ -61,11 +62,9 @@
   };
 </script>
 
-<div class="addStudents">
-  <Button on:click={() => (modalOpen = true)} --primary="var(--living-coral)" --secondary="white">
-    Ajouter des élèves
-  </Button>
-</div>
+<Button on:click={() => (modalOpen = true)} --primary="var(--living-coral)" --secondary="white">
+  Ajouter des élèves
+</Button>
 
 <Modal show={modalOpen}>
   <div class="card">
@@ -74,7 +73,7 @@
     </header>
 
     <form method="POST" action="?/addStudents" use:enhance={handleSubmitStudents} bind:this={form}>
-      {#each newStudentIds as id, i (id)}
+      {#each newStudentIds as id (id)}
         <section class="group" transition:slide>
           <div class="newStudent">
             <div class="textFields">
@@ -243,12 +242,6 @@
 </Modal>
 
 <style>
-  .addStudents {
-    display: flex;
-    justify-content: center;
-    margin: 1.5em 0;
-  }
-
   .newStudent,
   .textFields {
     display: flex;

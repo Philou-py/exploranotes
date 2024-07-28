@@ -15,6 +15,7 @@ level: string @index(fulltext) .
 subject: string @index(fulltext) .
 marked: bool @index(bool) .
 primary: bool @index(bool) .
+colour: string .
 address: string @index(fulltext) .
 academy: string @index(fulltext) .
 title: string @index(fulltext) .
@@ -112,6 +113,7 @@ type Group {
   evaluations
   marked
   primary
+  colour
   creationDate
 }
 

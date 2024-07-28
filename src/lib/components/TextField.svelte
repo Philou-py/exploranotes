@@ -3,7 +3,7 @@
   import InputField from "./InputField.svelte";
   import { slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
-    import {tick} from "svelte";
+  import { tick } from "svelte";
 
   export let type: "text" | "email" | "password" | "date" | "url" = "text";
   export let value = "";
@@ -19,6 +19,7 @@
   export let required = false;
   export let focused = false;
   export let hint = "";
+  export let style = "";
 
   const ERRORS = {
     PATTERN_MISMATCH: "Ce champ est requis",
@@ -100,7 +101,7 @@
         }
       }
     }
-  })()
+  })();
 
   // Binding 'value' on the input is not allowed when 'type' is variable
   const handleInput: FormEventHandler<HTMLInputElement> = (event) => {
@@ -110,7 +111,7 @@
   };
 </script>
 
-<div class="textField {state}" class:focused class:disabled={disabled || readonly}>
+<div class="textField {state}" class:focused class:disabled={disabled || readonly} {style}>
   <div class="prepend">
     <slot name="prepend" />
   </div>

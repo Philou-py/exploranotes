@@ -182,6 +182,8 @@
   }
 
   th {
+    font-size: 1.1em;
+    font-weight: 500;
     color: rgb(0 0 0 / 0.6);
     cursor: pointer;
     transition: color ease 200ms;
