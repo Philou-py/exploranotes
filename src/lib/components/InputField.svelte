@@ -40,7 +40,7 @@
     display: flex;
     position: relative;
     min-width: 0;
-    transition: border 250ms;
+    transition: border 300ms;
   }
 
   label {

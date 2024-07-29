@@ -8,6 +8,7 @@
   import { enhance, applyAction } from "$app/forms";
   import { snackBars } from "components/SnackBars.svelte";
   import { invalidate } from "$app/navigation";
+    import Chip from "components/Chip.svelte";
 
   export let data;
   let form: HTMLFormElement;
@@ -98,13 +99,14 @@
     headers={[
       { value: "name", text: "Nom" },
       { value: "email", text: "Adresse électronique" },
+      { value: "groups", text: "Groupes", noSorting: true },
     ]}
     items={data.teachersItems}
     lineNumbering
     sortBy="name"
     sortByDefault="name"
   >
-    <tr slot="item" let:item={{ name, email, admin }} let:lineNumber>
+    <tr slot="item" let:item={{ name, email, admin, groups }} let:lineNumber>
       <td class="center">{lineNumber}</td>
       <td>
         {name}
@@ -113,6 +115,15 @@
         {/if}
       </td>
       <td>{email}</td>
+      <td>
+        {#if groups}
+          <div class="flexCenter">
+            {#each groups as group (group.name)}
+              <Chip bgColour={group.colour}>{group.name}</Chip>
+            {/each}
+          </div>
+        {/if}
+      </td>
     </tr>
   </DataTable>
 </div>

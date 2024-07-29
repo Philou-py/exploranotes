@@ -5,6 +5,7 @@ import { Mutation } from "dgraph-js";
 import jwt from "jsonwebtoken";
 import { fail, redirect } from "@sveltejs/kit";
 import sendVerifEmail from "./sendVerifEmail.js";
+import { validationFail } from "$lib/utilities.js";
 
 // https://github.com/auth0/node-jsonwebtoken/issues/963
 const { sign } = jwt;
@@ -23,8 +24,8 @@ const emailQuery = `
 
 const NewUser = z.object({
   accountType: z.literal("teacher").or(z.literal("student")),
-  firstName: z.string(),
-  lastName: z.string(),
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(7),
   largeScreen: z.literal("yes").or(z.literal("no")),
@@ -33,11 +34,7 @@ const NewUser = z.object({
 export const actions = {
   default: async ({ request, cookies, locals }) => {
     const data = await request.formData();
-    const {
-      success,
-      error,
-      data: newUser,
-    } = NewUser.safeParse({
+    const { success, data: newUser } = NewUser.safeParse({
       accountType: data.get("accountType"),
       firstName: data.get("firstName"),
       lastName: data.get("lastName"),
@@ -46,10 +43,7 @@ export const actions = {
       largeScreen: data.get("largeScreen"),
     });
 
-    if (!success) {
-      console.log("Validation error:", error);
-      return fail(400, { message: "Le format des données entrées n'est pas valide !" });
-    }
+    if (!success) return validationFail();
 
     const name = `${newUser.firstName} ${newUser.lastName}`;
 

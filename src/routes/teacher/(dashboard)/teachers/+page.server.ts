@@ -13,6 +13,10 @@ interface TeachersQuery {
         name: string;
         email: string;
         admin?: boolean;
+        groups?: {
+          name: string;
+          colour: string;
+        }[];
       }[];
       pendingTeachers?: {
         key: string;
@@ -33,6 +37,10 @@ const teachersQuery = `
           key: uid
           name
           email
+          groups @filter(eq(primary, true)) {
+            name
+            colour
+          }
         }
         pendingTeachers: ~pendingJoin @filter(type(Teacher) and eq(verifiedEmail, true)) {
           key: uid
@@ -49,12 +57,12 @@ export const load = async ({ locals: { currentUser }, depends }) => {
   depends("app:teachers");
   const response = await db.newTxn().queryWithVars(teachersQuery, { $userUid: currentUser.uid });
   const { users }: TeachersQuery = response.getJson();
-  const school = users[0].school;
+  const school = users[0]?.school;
 
   return {
-    admin: school.admin,
-    teachersItems: school.teachers || [],
-    pendingTeachersItems: school.admin && school.pendingTeachers ? school.pendingTeachers : [],
+    admin: school?.admin || "",
+    teachersItems: school?.teachers || [],
+    pendingTeachersItems: school?.admin && school.pendingTeachers ? school.pendingTeachers : [],
   };
 };
 

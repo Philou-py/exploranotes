@@ -12,7 +12,7 @@ evalTemplates: [uid] .
 copies: [uid] @reverse .
 schoolYear: int @index(int) .
 level: string @index(fulltext) .
-subject: string @index(fulltext) .
+subjects: [uid] @reverse .
 marked: bool @index(bool) .
 primary: bool @index(bool) .
 colour: string .
@@ -109,7 +109,7 @@ type Group {
   name
   schoolYear
   level
-  subject
+  subjects
   evaluations
   marked
   primary
@@ -136,6 +136,10 @@ type Student {
   groups
   copies
   creationDate
+}
+
+type Subject {
+  name
 }
 
 type Teacher {

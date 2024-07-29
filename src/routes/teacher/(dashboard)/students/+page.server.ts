@@ -63,12 +63,15 @@ export const load = async ({ locals, depends }) => {
         .replace(/[\p{Diacritic}]/gu, ""),
       email: st.email.endsWith("@inconnu.fr") ? "" : st.email,
       hasAccount: !!st.hasAccount,
-      primaryGroup: st.groups && { name: st.groups[0].name, colour: st.groups[0].colour },
+      grName: st.groups && st.groups[0].name,
+      grColour: st.groups && st.groups[0].colour,
     })) || [];
 
   const groups: [string, string][] = [
-    ...new Set(students.filter((st) => st.primaryGroup).map((st) => st.primaryGroup!.name)),
+    ...new Set(students.filter((st) => st.grName).map((st) => st.grName!)),
   ].map((grName) => [grName, grName]);
+
+  groups.splice(0, 0, ["", "-- Pas de tri --"]);
 
   return { students, groups };
 };
@@ -142,9 +145,7 @@ interface DeleteQuery {
 
 const NewGroup = z.object({
   name: z.string().min(1).max(20),
-  subject: z.string().max(50),
   level: z.string().min(1).max(40),
-  marked: z.literal("yes").or(z.literal("no")),
   primary: z.literal("yes").or(z.literal("no")),
 });
 
@@ -473,13 +474,18 @@ export const actions = {
 
     const { data: newGroup, success } = NewGroup.safeParse({
       name: formData.get("name"),
-      subject: formData.get("subject"),
       level: formData.get("level"),
-      marked: formData.get("marked") || "no",
       primary: formData.get("primary") || "no",
     });
 
     if (!success) return validationFail();
+
+    const newSubjects = Array.from(formData.entries())
+      .filter(([key, _]) => key.startsWith("sub"))
+      .map(([_, val]) => ({
+        "dgraph.type": "Subject",
+        name: val,
+      }));
 
     const txn = db.newTxn();
     const mutation = new Mutation();
@@ -488,9 +494,8 @@ export const actions = {
         uid: "_:gr",
         "dgraph.type": "Group",
         name: newGroup.name,
-        subject: newGroup.subject,
+        subjects: newSubjects,
         level: newGroup.level,
-        marked: newGroup.marked === "yes",
         primary: newGroup.primary === "yes",
         schoolYear: new Date().getFullYear(),
         colour: `var(--${colours[Math.floor(Math.random() * colours.length)]})`,

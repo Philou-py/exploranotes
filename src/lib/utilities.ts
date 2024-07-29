@@ -18,7 +18,6 @@ export const colours = [
   "pepper-stem",
   "eden",
   "living-coral",
-  "creme-de-peche",
   "peach-pink",
   "fruit-dove",
   "sweet-corn",

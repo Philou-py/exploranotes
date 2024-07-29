@@ -105,7 +105,6 @@
 
   :global(.start) {
     text-align: start;
-    justify-content: start;
   }
 
   :global(.center) {
@@ -114,7 +113,13 @@
 
   :global(.end) {
     text-align: end;
-    justify-content: end;
+  }
+
+  :global(.flexCenter) {
+    display: flex;
+    justify-content: center;
+    gap: 0.2em;
+    flex-wrap: wrap;
   }
 
   :global(tr) {

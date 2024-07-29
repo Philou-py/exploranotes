@@ -111,7 +111,6 @@
       <div class="add">
         <Button
           variant="outlined"
-          shrinkToIcon
           --primary={darken("var(--pepper-stem)", 20)}
           on:click={handleAdd}
         >
