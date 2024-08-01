@@ -24,7 +24,7 @@ const groupQuery = `
         }
       }
       subjects(orderasc: name) {
-        key: uid
+        uid
         name
       }
       subgroups(orderasc: name) {
@@ -90,6 +90,9 @@ const addSubgroupQuery = `
     groups(func: uid($groupUid)) @filter(uid_in(~groups, $userUid)) {
       nb: count(subgroups @filter(eq(name, $subgroupName)))
     }
+    teachers(func: uid($userUid)) @normalize {
+      admin: count(groups @filter(uid($groupUid)))
+    }
   }
 `;
 
@@ -97,6 +100,7 @@ interface AddSubgroupQuery {
   groups: {
     nb: number;
   }[];
+  teachers: { admin: number }[];
 }
 
 const ManageSubgroup = z.object({
@@ -106,15 +110,19 @@ const ManageSubgroup = z.object({
 });
 
 const checkSubgroupQuery = `
-  query CheckSubgroupQuery($stUid: string, $sgUid: string) {
+  query CheckSubgroupQuery($stUid: string, $sgUid: string, $teacherUid: string, $groupUid: string) {
     students(func: uid($stUid)) {
       existant: count(subgroups @filter(uid($sgUid)))
+    }
+    teachers(func: uid($teacherUid)) {
+      admin: count(groups @filter(uid($groupUid)))
     }
   }
 `;
 
 interface CheckSubgroupQuery {
   students: { existant: number }[];
+  teachers: { admin: number }[];
 }
 
 export const actions = {
@@ -128,8 +136,12 @@ export const actions = {
       $groupUid: params.groupId,
       $subgroupName: subgroupName.toLowerCase(),
     });
-    const { groups }: AddSubgroupQuery = queryRes.getJson();
+    const { groups, teachers }: AddSubgroupQuery = queryRes.getJson();
 
+    if (teachers[0].admin === 0)
+      return fail(403, {
+        message: "Pour créer un sous-groupe, vous devez être administrateur !",
+      });
     if (groups.length === 0) return validationFail();
     if (groups[0].nb > 0) return fail(400, { message: "Ce sous-groupe existe déjà !" });
 
@@ -146,7 +158,7 @@ export const actions = {
     return { message: `Le sous-groupe ${subgroupName} a bien été créé !` };
   },
 
-  addRemSubgroup: async ({ request }) => {
+  addRemSubgroup: async ({ request, params, locals }) => {
     const formData = await request.formData();
     const { success, data: newJoin } = ManageSubgroup.safeParse({
       stUid: formData.get("stUid"),
@@ -158,9 +170,15 @@ export const actions = {
     const queryRes = await db.newTxn().queryWithVars(checkSubgroupQuery, {
       $stUid: newJoin.stUid,
       $sgUid: newJoin.sgUid,
+      $teacherUid: locals.currentUser.uid,
+      $groupUid: params.groupId,
     });
-    const { students }: CheckSubgroupQuery = queryRes.getJson();
+    const { students, teachers }: CheckSubgroupQuery = queryRes.getJson();
 
+    if (teachers[0].admin === 0)
+      return fail(403, {
+        message: "Pour ajouter ou retirer un sous-groupe, vous devez être administrateur !",
+      });
     if (students.length === 0) return validationFail();
 
     const txn = db.newTxn();

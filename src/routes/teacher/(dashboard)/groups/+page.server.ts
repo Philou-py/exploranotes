@@ -3,52 +3,6 @@ import { validationFail } from "$lib/utilities";
 import { Mutation } from "dgraph-js";
 import { z } from "zod";
 
-const groupsQuery = `
-  query GroupsQuery($schoolUid: string, $userUid: string) {
-    schools(func: uid($schoolUid)) {
-      groups {
-        key: uid
-        name
-        nbStudents: count(~groups @filter(type(Student)))
-        level
-        admins: ~groups @filter(type(Teacher)) (orderasc: name) { name }
-        fav: count(~favGroups @filter(uid($userUid)))
-      }
-    }
-  }
-`;
-
-interface GroupsQuery {
-  schools: {
-    groups: {
-      key: string;
-      name: string;
-      nbStudents: number;
-      level: string;
-      admins?: { name: string }[];
-      fav: number;
-    }[];
-  }[];
-}
-
-export const load = async ({ locals, depends }) => {
-  depends("app:groupsList");
-  const queryRes = await db.newTxn().queryWithVars(groupsQuery, {
-    $userUid: locals.currentUser.uid,
-    $schoolUid: locals.currentUser.school.uid,
-  });
-  const { schools }: GroupsQuery = queryRes.getJson();
-
-  return {
-    groups:
-      schools[0]?.groups.map((gr) => ({
-        ...gr,
-        admins: gr.admins?.map((teach) => teach.name) || [],
-        fav: gr.fav === 1,
-      })) || [],
-  };
-};
-
 const NewFav = z.object({
   groupId: z.string(),
   groupName: z.string(),

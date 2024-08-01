@@ -2,8 +2,15 @@ import { db } from "$lib/dgraph";
 
 const sideBarQuery = `
   query SideBarQuery($userUid: string) {
-    users(func: uid($userUid)) {
-      favGroups {
+    var(func: uid($userUid)) {
+      subjects as favSubjects {
+        groups as ~subjects
+      }
+    }
+    favGroups(func: uid(groups)) {
+      uid
+      name
+      favSubjects: subjects @filter(uid(subjects)) {
         uid
         name
       }
@@ -12,23 +19,24 @@ const sideBarQuery = `
 `;
 
 interface SideBarQuery {
-  users: {
-    favGroups: { uid: string; name: string }[];
+  favGroups: {
+    uid: string;
+    name: string;
+    favSubjects: { uid: string; name: string }[];
   }[];
 }
 
 export const load = async ({ locals, cookies, depends }) => {
-  depends("app:favGroups");
+  depends("app:favSubjects");
   const sideBarOpen = cookies.get("SBOpen") === "yes";
   const largeScreen = cookies.get("LGScreen") === "yes";
-  let favGroups: SideBarQuery["users"][0]["favGroups"] = [];
+  let favGroups: SideBarQuery["favGroups"] = [];
 
   if (locals.currentUser.isAuthenticated) {
     const queryRes = await db
       .newTxn()
       .queryWithVars(sideBarQuery, { $userUid: locals.currentUser.uid });
-    const { users }: SideBarQuery = queryRes.getJson();
-    if (users[0]) favGroups = users[0].favGroups;
+    favGroups = (queryRes.getJson() as SideBarQuery).favGroups;
   }
 
   return { currentUser: locals.currentUser, sideBarOpen, largeScreen, favGroups };

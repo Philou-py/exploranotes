@@ -9,6 +9,7 @@
 
 <style>
   .chip {
+    display: inline-block;
     text-align: center;
     color: white;
     padding: 0.15em 0.3em;

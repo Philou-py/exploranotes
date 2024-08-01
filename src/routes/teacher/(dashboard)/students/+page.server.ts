@@ -1,6 +1,6 @@
 import { db } from "$lib/dgraph";
 import { z } from "zod";
-import { colours, validationFail } from "$lib/utilities";
+import { getRandomColour, validationFail } from "$lib/utilities";
 import { Mutation } from "dgraph-js";
 import { fail } from "@sveltejs/kit";
 import { createEmail, transporter } from "$lib/mail";
@@ -15,40 +15,81 @@ interface StudentsQuery {
       nameSlug: string;
       email: string;
       hasAccount: boolean;
-      selected?: boolean;
-      groups?: {
+      primGroups?: {
         name: string;
         colour: string;
       }[];
+      otherGroups?: {
+        name: string;
+        colour: string;
+      }[];
+      selected: number;
+      toRemove?: boolean;
+    }[];
+    groups: {
+      key: string;
+      name: string;
+      nbStudents: number;
+      level: string;
+      primary: boolean;
+      admins?: { name: string }[];
+      isAdmin: number;
     }[];
   }[];
 }
 
-const studentsQuery = `
-  query StudentsQuery($schoolUid: string) {
-    schools(func: uid($schoolUid)) {
-      students: ~school @filter(type(Student)) {
-        key: uid
-        firstName
-        lastName
-        name
-        email
-        hasAccount: verifiedEmail
-        groups @filter(eq(primary, true)) {
+export const load = async ({ locals, depends, url }) => {
+  depends("app:students");
+
+  const newGroup = url.searchParams.get("newGroup") === "yes";
+  let groupToEdit = (!newGroup && url.searchParams.get("editGroup")) || "";
+  if (groupToEdit !== "" && !groupToEdit.startsWith("0x")) groupToEdit = "";
+
+  const studentsQuery = `
+    query StudentsQuery {
+      schools(func: uid(${locals.currentUser.school.uid})) {
+        students: ~school @filter(type(Student)) {
+          key: uid
+          firstName
+          lastName
           name
-          colour
+          email
+          hasAccount: verifiedEmail
+          primGroups: groups @filter(eq(primary, true)) (orderasc: name) {
+            name
+            colour
+          }
+          otherGroups: groups @filter(eq(primary, false)) (orderasc: name) {
+            name
+            colour
+          }
+          selected: count(groups @filter(uid(${groupToEdit})))
+        }
+        groups {
+          key: uid
+          name
+          nbStudents: count(~groups @filter(type(Student)))
+          level
+          primary
+          admins: ~groups @filter(type(Teacher)) (orderasc: name) { name }
+          isAdmin: count(~groups @filter(type(Teacher) and uid(${locals.currentUser.uid})))
         }
       }
     }
-  }
-`;
+  `;
 
-export const load = async ({ locals, depends }) => {
-  depends("app:students");
-  const response = await db
-    .newTxn()
-    .queryWithVars(studentsQuery, { $schoolUid: locals.currentUser.school.uid });
+  const response = await db.newTxn().query(studentsQuery);
   const { schools }: StudentsQuery = response.getJson();
+
+  let groupPrefill = { name: "", level: "", primary: false };
+  const targetGroup = schools[0]?.groups.find((gr) => gr.key === groupToEdit && gr.isAdmin === 1);
+  if (targetGroup)
+    groupPrefill = {
+      name: targetGroup.name,
+      level: targetGroup.level,
+      primary: targetGroup.primary,
+    };
+  else groupToEdit = "";
 
   const students =
     schools[0]?.students.map((st) => ({
@@ -59,17 +100,26 @@ export const load = async ({ locals, depends }) => {
         .replace(/[\p{Diacritic}]/gu, ""),
       email: st.email.endsWith("@inconnu.fr") ? "" : st.email,
       hasAccount: !!st.hasAccount,
-      grName: st.groups && st.groups[0].name,
-      grColour: st.groups && st.groups[0].colour,
+      primGroupsStr: st.primGroups ? st.primGroups.join(" ") : "",
+      otherGroupsStr: st.otherGroups ? st.otherGroups.join(" ") : "",
+      selected: st.selected === 1,
     })) || [];
 
-  const groups: [string, string][] = [
-    ...new Set(students.filter((st) => st.grName).map((st) => st.grName!)),
-  ].map((grName) => [grName, grName]);
-
-  groups.splice(0, 0, ["", "-- Pas de tri --"]);
-
-  return { students, groups };
+  return {
+    students,
+    groups:
+      schools[0]?.groups.map((gr) => ({
+        ...gr,
+        admins: gr.admins?.map((teach) => teach.name) || [],
+      })) || [],
+    groupsItems: [
+      ["", "-- Pas de tri --"] as [string, string],
+      ...(schools[0]?.groups.map((gr) => [gr.key, gr.name] as [string, string]) || []),
+    ],
+    groupToEdit,
+    newGroup,
+    groupPrefill,
+  };
 };
 
 export type SummaryItem = {
@@ -140,10 +190,21 @@ interface DeleteQuery {
 }
 
 const NewGroup = z.object({
+  groupToEdit: z.string(),
   name: z.string().min(1).max(20),
   level: z.string().min(1).max(40),
   primary: z.literal("yes").or(z.literal("no")),
 });
+
+interface CreateGroupQuery {
+  scCheck: {
+    allInSchool: boolean;
+  }[];
+  grCheck: {
+    isAdmin: boolean;
+    allInGroup: boolean;
+  }[];
+}
 
 export const actions = {
   addStudents: async ({ request, locals }) => {
@@ -452,29 +513,51 @@ export const actions = {
     const inputStudents = Array.from(formData.entries())
       .filter(([id, _]) => id.startsWith("st"))
       .map(([_, uid]) => uid);
-
-    let createGroupQuery = `
-      query CreateGroupQuery {
-        schools(func: uid(${schoolUid})) {
-          students: ~school @filter(uid(${inputStudents.join(", ")}) and eq(dgraph.type, Student)) {
-            nbStudents: count(uid)
-          }
-        }
-      }
-    `;
-    const queryRes = await db.newTxn().query(createGroupQuery);
-    const { schools }: { schools: { students: { nbStudents: number }[] }[] } = queryRes.getJson();
-
-    if (schools.length === 0 || schools[0].students[0].nbStudents !== inputStudents.length)
-      return validationFail();
+    const removeStudents = Array.from(formData.entries())
+      .filter(([id, _]) => id.startsWith("rem"))
+      .map(([_, uid]) => uid);
 
     const { data: newGroup, success } = NewGroup.safeParse({
+      groupToEdit: formData.get("groupToEdit"),
       name: formData.get("name"),
       level: formData.get("level"),
       primary: formData.get("primary") || "no",
     });
 
     if (!success) return validationFail();
+
+    let createGroupQuery = `
+      query CreateGroupQuery {
+        var(func: uid(${schoolUid})) {
+          groups @filter(uid(${newGroup.groupToEdit})) {
+            nbAdmins as count(~groups @filter(type(Teacher) and uid(${locals.currentUser.uid})))
+          }
+        }
+        var(func: uid(${schoolUid})) {
+          groups @filter(uid(${newGroup.groupToEdit})) {
+            nbRemSt as count(~groups @filter(type(Student) and uid(${removeStudents.join(", ")})))
+          }
+        }
+        var(func: uid(${schoolUid})) {
+          nbStudents as count(~school @filter(type(Student) and uid(${inputStudents.join(", ")})))
+        }
+        scCheck(func: uid(${schoolUid})) {
+          allInSchool: math(nbStudents == ${inputStudents.length})
+        }
+        grCheck(func: uid(${newGroup.groupToEdit})) {
+          isAdmin: math(nbAdmins == 1)
+          allInGroup: math(nbRemSt == ${removeStudents.length})
+        }
+      }
+    `;
+    const queryRes = await db.newTxn().query(createGroupQuery);
+    const { scCheck, grCheck }: CreateGroupQuery = queryRes.getJson();
+
+    if (
+      !scCheck[0].allInSchool ||
+      (newGroup.groupToEdit && (!grCheck[0].isAdmin || !grCheck[0].allInGroup))
+    )
+      return validationFail();
 
     const newSubjects = Array.from(formData.entries())
       .filter(([key, _]) => key.startsWith("sub"))
@@ -485,33 +568,44 @@ export const actions = {
 
     const txn = db.newTxn();
     const mutation = new Mutation();
+
+    const groupUid = newGroup.groupToEdit || "_:gr";
     mutation.setSetJson([
       {
-        uid: "_:gr",
+        uid: groupUid,
         "dgraph.type": "Group",
         name: newGroup.name,
         subjects: newSubjects,
         level: newGroup.level,
         primary: newGroup.primary === "yes",
         schoolYear: new Date().getFullYear(),
-        colour: `var(--${colours[Math.floor(Math.random() * colours.length)]})`,
+        colour: `var(--${getRandomColour()})`,
         creationDate: new Date(),
       },
-      ...inputStudents.map((uid) => ({ uid, groups: { uid: "_:gr" } })),
+      ...inputStudents.map((uid) => ({ uid, groups: { uid: groupUid } })),
       {
         uid: locals.currentUser.uid,
-        groups: { uid: "_:gr" },
+        groups: { uid: groupUid },
       },
       {
         uid: locals.currentUser.school.uid,
-        groups: { uid: "_:gr" },
+        groups: { uid: groupUid },
       },
     ]);
+
+    mutation.setDeleteJson(
+      removeStudents.map((uid) => ({
+        uid,
+        groups: { uid: groupUid },
+      })),
+    );
 
     await txn.mutate(mutation);
     await txn.commit();
 
-    const actionReturn: MsgReturn = { message: `Le groupe ${newGroup.name} a bien été créé !` };
+    const actionReturn: MsgReturn = {
+      message: `Le groupe ${newGroup.name} a bien été ${newGroup.groupToEdit ? "modifié" : "créé"} !`,
+    };
     return actionReturn;
   },
 };

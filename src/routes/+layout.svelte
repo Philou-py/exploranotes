@@ -47,7 +47,6 @@
       links={[
         ["/teacher/teachers", "Professeurs"],
         ["/teacher/students", "Élèves"],
-        ["/teacher/groups", "Groupes"],
       ]}
       openByDefault
     >
@@ -84,7 +83,32 @@
         <ChevronDown slot="append" class={`chevron ${open ? "rotate" : ""}`} />
       </Button>
 
-      <Button slot="btn" let:text variant="text" --primary="var(--turmeric)" block>{text}</Button>
+      {#each data.favGroups as favGroup (favGroup.uid)}
+        <ButtonGroup
+          links={favGroup.favSubjects.map((sub) => [
+            `/teacher/groups/${favGroup.uid}/subjects/${sub.uid}`,
+            sub.name,
+          ])}
+          openByDefault
+        >
+          <a
+            slot="trigger"
+            let:open
+            let:toggle
+            href={`/teacher/groups/${favGroup.uid}`}
+            tabindex="-1"
+          >
+            <Button variant="text" --primary="var(--princess-blue)" on:click={toggle} block>
+              {favGroup.name}
+              <ChevronDown slot="append" class={`chevron ${open ? "rotate" : ""}`} />
+            </Button>
+          </a>
+
+          <Button slot="btn" let:text variant="text" --primary="var(--turmeric)" block>
+            {text}
+          </Button>
+        </ButtonGroup>
+      {/each}
     </ButtonGroup>
   {/if}
 </Navigation>

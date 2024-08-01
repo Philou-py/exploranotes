@@ -7,8 +7,10 @@
   import Close from "svelte-material-icons/Close.svelte";
   import Delete from "svelte-material-icons/DeleteOutline.svelte";
   import Plus from "svelte-material-icons/Plus.svelte";
+  import FolderEdit from "svelte-material-icons/FolderEditOutline.svelte";
   import AccountEdit from "svelte-material-icons/AccountEdit.svelte";
   import AccountPlus from "svelte-material-icons/AccountMultiplePlusOutline.svelte";
+  import ArrowRight from "svelte-material-icons/ArrowRightBoldHexagonOutline.svelte";
   import Block from "svelte-material-icons/BlockHelper.svelte";
   import Filter from "svelte-material-icons/FilterOutline.svelte";
   import FilterMenu from "svelte-material-icons/FilterMenuOutline.svelte";
@@ -21,7 +23,7 @@
   import EditStudentModal from "./EditStudentModal.svelte";
   import { enhance, applyAction } from "$app/forms";
   import { snackBars } from "components/SnackBars.svelte";
-  import { invalidate } from "$app/navigation";
+  import { goto, invalidate } from "$app/navigation";
   import Checkbox from "components/Checkbox.svelte";
   import { slide } from "svelte/transition";
   import { cubicInOut } from "svelte/easing";
@@ -29,18 +31,19 @@
   import Chip from "components/Chip.svelte";
   import { darken } from "$lib/utilities";
   import { tick } from "svelte";
+  import { page } from "$app/stores";
 
   export let data;
   let editStudent = { uid: "", firstName: "", lastName: "", email: "", hasAccount: false };
   let editModalOpen = false;
-  let filteredStudents = data.students;
+  $: groupCreation = !!data.groupToEdit || !!data.newGroup;
+  $: filteredStudents = data.students;
   $: students = data.students.filter(({ selected }) => !selected);
   $: selectedStudents = data.students.filter(({ selected }) => selected);
   let searchText = "";
   let selectedGroup = "";
-  let groupCreation = false;
   let subCounter = 1;
-  let subIds = ["sub1"];
+  $: subIds = data.groupToEdit ? [] : ["sub1"];
   let subjectsFS: HTMLFieldSetElement;
   let loading = "";
 
@@ -50,8 +53,9 @@
       .normalize("NFD")
       .replace(/[\p{Diacritic}]/gu, "");
     filteredStudents = students.filter(
-      ({ grName, nameSlug }) =>
-        nameSlug.includes(searchTextSlug) && (!selectedGroup || grName === selectedGroup),
+      ({ primGroups, nameSlug }) =>
+        nameSlug.includes(searchTextSlug) &&
+        (!selectedGroup || primGroups?.some(({ name }) => name === selectedGroup)),
     );
   }
 
@@ -89,13 +93,15 @@
   const handleCreateGroup: SubmitFunction = ({ formData }) => {
     loading = "createGroup";
     selectedStudents.forEach((st, i) => formData.set(`st${i}`, st.key));
+    data.students.forEach((st, i) => {
+      if (st.toRemove) formData.set(`rem${i}`, st.key);
+    });
 
     return async ({ result }) => {
       switch (result.type) {
         case "success":
           snackBars.haveASnack(result.data!.message);
-          invalidate("app:students");
-          groupCreation = false;
+          goto("students", { replaceState: true });
           break;
         case "failure":
           snackBars.haveASnack(result.data!.message, "error");
@@ -116,32 +122,90 @@
 
   <EditStudentModal student={editStudent} bind:modalOpen={editModalOpen} />
 
-  <div class="buttons">
-    <AddStudents />
-    <Button
-      --primary="var(--fruit-dove)"
-      --secondary="white"
-      on:click={() => {
-        groupCreation = !groupCreation;
-        data.students = data.students.map((st) => ({ ...st, selected: false }));
-      }}
-    >
-      {#if groupCreation}
-        Annuler
-      {:else}
-        Nouveau groupe
-      {/if}
-    </Button>
+  <div class="groupsTitle">
+    <h2>Groupes</h2>
+
+    <div class="buttons">
+      <AddStudents />
+      <Button
+        --primary="var(--fruit-dove)"
+        --secondary="white"
+        on:click={() => {
+          const urlSearchParams = new URLSearchParams($page.url.searchParams.toString());
+          urlSearchParams.delete("editGroup");
+          if (!groupCreation) urlSearchParams.set("newGroup", "yes");
+          else urlSearchParams.delete("newGroup");
+          goto(`?${urlSearchParams.toString()}`, { replaceState: true });
+        }}
+      >
+        {#if groupCreation}
+          Annuler
+        {:else}
+          Nouveau groupe
+        {/if}
+      </Button>
+    </div>
   </div>
+
+  <DataTable
+    headers={[
+      { value: "name", text: "Nom" },
+      { value: "nbStudents", text: "Élèves" },
+      { value: "level", text: "Niveau" },
+      { value: "admins", text: "Administrateurs", noSorting: true },
+      { value: "actions", text: "Actions", noSorting: true },
+    ]}
+    items={data.groups}
+    sortByDefault="name"
+    sortBy="name"
+    emptyText="Aucun groupe n’a été créé pour cet établissement !"
+    lineNumbering
+  >
+    <tr slot="item" let:item={{ key, name, nbStudents, level, admins, isAdmin }} let:lineNumber>
+      <td class="center">{lineNumber}</td>
+      <td>
+        <div style="display: flex; align-items: center; gap: 0.5em;">
+          <span>{name}</span>
+          <a href={`groups/${key}`} tabindex="-1">
+            <Button variant="text" --primary="var(--fiesta)" icon>
+              <ArrowRight />
+            </Button>
+          </a>
+        </div>
+      </td>
+      <td class="center">{nbStudents}</td>
+      <td class="center">{level}</td>
+      <td class="center">{admins ? admins.join(", ") : ""}</td>
+      <td class="center">
+        <Button
+          variant="text"
+          --primary="var(--turmeric)"
+          on:click={() => {
+            const urlSearchParams = new URLSearchParams($page.url.searchParams.toString());
+            urlSearchParams.delete("newGroup");
+            urlSearchParams.set("editGroup", key);
+            goto(`?${urlSearchParams.toString()}`, { replaceState: true });
+          }}
+          disabled={!isAdmin}
+          icon
+        >
+          <FolderEdit />
+        </Button>
+      </td>
+    </tr>
+  </DataTable>
 
   {#if groupCreation}
     <div transition:slide={{ easing: cubicInOut }} style="padding: 1.5em 0;">
       <form method="POST" action="?/createGroup" use:enhance={handleCreateGroup}>
+        <input type="hidden" name="groupToEdit" value={data.groupToEdit} />
+
         <div class="fieldsets">
           <fieldset class="groupInfo">
             <legend>Informations générales</legend>
             <TextField
               name="name"
+              value={data.groupPrefill.name}
               label="Nom du groupe"
               placeholder="Ex : Spé Maths Gr 7"
               hint="Ce nom devrait être unique dans l'établissement."
@@ -152,6 +216,7 @@
             </TextField>
             <TextField
               name="level"
+              value={data.groupPrefill.level}
               label="Niveau"
               placeholder="Ex : Terminale"
               maxlength={40}
@@ -160,7 +225,7 @@
               <School slot="prepend" />
             </TextField>
 
-            <Checkbox name="primary">
+            <Checkbox name="primary" checked={data.groupPrefill.primary}>
               <svelte:fragment slot="right">
                 Groupe principal (idéalement, un par élève)
               </svelte:fragment>
@@ -186,7 +251,7 @@
                   size="small"
                   tabindex={-1}
                   --primary="var(--jester-red)"
-                  disabled={subIds.length === 1}
+                  disabled={!data.groupToEdit && subIds.length === 1}
                   on:click={() => (subIds = subIds.filter((subId) => subId !== subject))}
                   style="margin-left: 0.2em;"
                   icon
@@ -213,7 +278,8 @@
           headers={[
             { value: "name", text: "Nom" },
             { value: "email", text: "Adresse électronique" },
-            { value: "grName", text: "Groupe" },
+            { value: "primGroupsStr", text: "Groupe principal" },
+            { value: "otherGroupsStr", text: "Autres groupes" },
             { value: "hasAccount", text: "Inscrit(e)" },
             { value: "actions", text: "Actions", noSorting: true },
           ]}
@@ -228,8 +294,17 @@
             <td>{student.name}</td>
             <td class="breakAll">{student.email}</td>
             <td class="center">
-              {#if student.grName && student.grColour}
-                <Chip bgColour={student.grColour}>{student.grName}</Chip>
+              {#if student.primGroups}
+                {#each student.primGroups as gr (gr.name)}
+                  <Chip bgColour={gr.colour} style="margin: 0.1em;">{gr.name}</Chip>
+                {/each}
+              {/if}
+            </td>
+            <td class="center">
+              {#if student.otherGroups}
+                {#each student.otherGroups as gr (gr.name)}
+                  <Chip bgColour={gr.colour} style="margin: 0.1em;">{gr.name}</Chip>
+                {/each}
               {/if}
             </td>
             <td>
@@ -247,7 +322,7 @@
                   shrinkToIcon
                   on:click={() =>
                     (data.students = data.students.map((st) =>
-                      st.key === student.key ? { ...st, selected: false } : st,
+                      st.key === student.key ? { ...st, selected: false, toRemove: true } : st,
                     ))}
                 >
                   <AccountRemove slot="prepend" />
@@ -272,7 +347,7 @@
             --secondary="white"
             formSubmit
           >
-            Créer
+            {data.groupToEdit ? "Modifier" : "Créer"}
           </Button>
         </div>
 
@@ -282,7 +357,7 @@
   {/if}
 
   <div class="filters">
-    <Select label="Filtrer par groupe" bind:value={selectedGroup} items={data.groups}>
+    <Select label="Filtrer par groupe" bind:value={selectedGroup} items={data.groupsItems}>
       <FilterMenu slot="prepend" />
     </Select>
     <TextField
@@ -308,7 +383,8 @@
       : [
           { value: "name", text: "Nom" },
           { value: "email", text: "Adresse électronique" },
-          { value: "grName", text: "Groupe" },
+          { value: "primGroupsStr", text: "Groupe principal" },
+          { value: "otherGroupsStr", text: "Autres groupes" },
           { value: "hasAccount", text: "Inscrit(e)" },
           { value: "actions", text: "Actions", noSorting: true },
         ]}
@@ -322,7 +398,7 @@
   >
     <tr
       slot="item"
-      let:item={{ key, firstName, lastName, name, email, grName, grColour, hasAccount }}
+      let:item={{ key, firstName, lastName, name, email, primGroups, otherGroups, hasAccount }}
       let:lineNumber
     >
       <td class="center">{lineNumber}</td>
@@ -347,8 +423,17 @@
         </td>
       {:else}
         <td class="center">
-          {#if grName && grColour}
-            <Chip bgColour={grColour}>{grName}</Chip>
+          {#if primGroups}
+            {#each primGroups as gr (gr.name)}
+              <Chip bgColour={gr.colour} style="margin: 0.1em;">{gr.name}</Chip>
+            {/each}
+          {/if}
+        </td>
+        <td class="center">
+          {#if otherGroups}
+            {#each otherGroups as gr (gr.name)}
+              <Chip bgColour={gr.colour} style="margin: 0.1em;">{gr.name}</Chip>
+            {/each}
           {/if}
         </td>
         <td>
@@ -413,7 +498,7 @@
   .filters {
     display: flex;
     gap: 2em;
-    margin: 0.7em 0;
+    margin: 1.5em 0 0.7em;
   }
 
   @media (max-width: 960px) {
@@ -426,6 +511,19 @@
     flex: 1 1 50%;
   }
 
+  .groupsTitle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5em;
+    margin: 1em 0;
+  }
+
+  .groupsTitle h2 {
+    margin: 0;
+  }
+
   .buttons,
   .newGroup {
     display: flex;
@@ -435,6 +533,7 @@
   .buttons {
     justify-content: center;
     gap: 0.5em;
+    margin-left: auto;
   }
 
   .newGroup {

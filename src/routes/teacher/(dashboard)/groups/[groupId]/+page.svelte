@@ -68,29 +68,10 @@
 </script>
 
 <div class="container">
-  <h1>Groupe {data.name}</h1>
-
-  <!--
-  <section class="subjects">
-    {#each data.subjects as subject, i (subject.uid)}
-      <div class="subject">
-        <div class="overview">
-          <span>
-            {subject.name}
-          </span>
-          <Button variant="text" on:click={() => (openSubjects[i] = !openSubjects[i])} icon>
-            <ChevronDown class={`chevron ${openSubjects[i] ? "rotate" : ""}`} />
-          </Button>
-        </div>
-        {#if openSubjects[i]}
-          <div>
-
-          </div>
-        {/if}
-      </div>
-    {/each}
-  </section>
-  -->
+  <h1>
+    Groupe {data.name}<br />
+    <span style="font-size: 80%">{data.level}</span>
+  </h1>
 
   <section class="subjects">
     {#each data.subjects as subject, i (subject.uid)}
