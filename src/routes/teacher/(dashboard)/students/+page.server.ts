@@ -1,46 +1,42 @@
-import { db } from "$lib/dgraph.js";
+import { db } from "$lib/dgraph";
 import { z } from "zod";
 import { colours, validationFail } from "$lib/utilities";
 import { Mutation } from "dgraph-js";
 import { fail } from "@sveltejs/kit";
-import { createEmail, transporter } from "$lib/mail.js";
+import { createEmail, transporter } from "$lib/mail";
 
 interface StudentsQuery {
-  users: {
-    school: {
-      students: {
-        key: string;
-        firstName: string;
-        lastName: string;
+  schools: {
+    students: {
+      key: string;
+      firstName: string;
+      lastName: string;
+      name: string;
+      nameSlug: string;
+      email: string;
+      hasAccount: boolean;
+      selected?: boolean;
+      groups?: {
         name: string;
-        nameSlug: string;
-        email: string;
-        hasAccount: boolean;
-        selected?: boolean;
-        groups?: {
-          name: string;
-          colour: string;
-        }[];
+        colour: string;
       }[];
-    };
+    }[];
   }[];
 }
 
 const studentsQuery = `
-  query StudentsQuery($userUid: string) {
-    users(func: uid($userUid)) {
-      school {
-        students: ~school @filter(type(Student)) {
-          key: uid
-          firstName
-          lastName
+  query StudentsQuery($schoolUid: string) {
+    schools(func: uid($schoolUid)) {
+      students: ~school @filter(type(Student)) {
+        key: uid
+        firstName
+        lastName
+        name
+        email
+        hasAccount: verifiedEmail
+        groups @filter(eq(primary, true)) {
           name
-          email
-          hasAccount: verifiedEmail
-          groups @filter(eq(primary, true)) {
-            name
-            colour
-          }
+          colour
         }
       }
     }
@@ -51,11 +47,11 @@ export const load = async ({ locals, depends }) => {
   depends("app:students");
   const response = await db
     .newTxn()
-    .queryWithVars(studentsQuery, { $userUid: locals.currentUser.uid });
-  const { users }: StudentsQuery = response.getJson();
+    .queryWithVars(studentsQuery, { $schoolUid: locals.currentUser.school.uid });
+  const { schools }: StudentsQuery = response.getJson();
 
   const students =
-    users[0]?.school.students.map((st) => ({
+    schools[0]?.students.map((st) => ({
       ...st,
       nameSlug: st.name
         .toLowerCase()
@@ -504,6 +500,10 @@ export const actions = {
       ...inputStudents.map((uid) => ({ uid, groups: { uid: "_:gr" } })),
       {
         uid: locals.currentUser.uid,
+        groups: { uid: "_:gr" },
+      },
+      {
+        uid: locals.currentUser.school.uid,
         groups: { uid: "_:gr" },
       },
     ]);

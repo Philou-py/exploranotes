@@ -92,7 +92,6 @@
   table {
     width: 100%;
     background-color: white;
-    position: relative;
     border-collapse: collapse;
     color: rgb(0 0 0 / 0.87);
   }
@@ -122,10 +121,6 @@
     flex-wrap: wrap;
   }
 
-  :global(tr) {
-    position: relative;
-  }
-
   :global(tr:not(.headers):hover td) {
     background-color: rgb(0 0 0 / 0.05);
     background-clip: padding-box;
@@ -143,11 +138,8 @@
 
   th,
   :global(td) {
-    position: relative;
     padding: 5px 10px;
     transition: background-color ease 80ms;
-    overflow: hidden;
-    white-space: nowrap;
   }
 
   :global(td.breakAll) {

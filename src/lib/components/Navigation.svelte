@@ -7,7 +7,6 @@
   import Cookies from "js-cookie";
 
   export let currentUser = {
-    accountType: "teacher" as "teacher" | "student",
     name: "",
     isAuthenticated: false,
   };
@@ -74,11 +73,7 @@
 >
   <div class="sideBarContent">
     <Avatar name={currentUser.name} style="margin: 0 auto 30px; font-size: 30px;" --size="150px" />
-    {#if currentUser.accountType === "teacher"}
-      <slot name="teacherMenu" />
-    {:else}
-      <slot name="studentMenu" />
-    {/if}
+    <slot />
   </div>
 </div>
 

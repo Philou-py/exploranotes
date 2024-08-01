@@ -12,20 +12,21 @@
   export let required = false;
   export let focused = false;
   export let hint = "";
+  export let persistentHint = false;
 
   let active = false;
-  let message = "";
+  let message = persistentHint ? hint : "";
 
   const handleFocus = () => {
     active = true;
     focused = true;
-    message = hint;
+    if (!persistentHint) message = hint;
   };
 
   const handleBlur = () => {
     if (value === "") active = false;
     focused = false;
-    message = "";
+    if (!persistentHint) message = "";
   };
 
   // Lift label when input is not empty, not only on focus
@@ -72,11 +73,14 @@
 </div>
 
 <style lang="scss">
-  $blue: #1867c0;
+  /* Princess blue */
+  $blue: lighten(#00539c, 5%);
 
   .textField {
     display: grid;
     color: rgb(0 0 0 / 0.7);
+    /* If in a flex container, grow by default */
+    flex-grow: 1;
     grid-template-areas:
       "prepend field append"
       ". hints hints";

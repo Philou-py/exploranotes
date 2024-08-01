@@ -66,7 +66,7 @@
   Ajouter des élèves
 </Button>
 
-<Modal show={modalOpen}>
+<Modal bind:show={modalOpen}>
   <div class="card">
     <header>
       <h2 class="cardTitle center">Ajouter des élèves</h2>

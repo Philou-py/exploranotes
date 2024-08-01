@@ -5,6 +5,8 @@ lastName: string @index(hash) .
 name: string @index(fulltext) .
 verifiedEmail: bool @index(bool) .
 groups: [uid] @reverse .
+favGroups: [uid] @reverse .
+subgroups: [uid] @reverse .
 school: uid @reverse .
 pendingJoin: uid @reverse .
 evaluations: [uid] @reverse .
@@ -13,7 +15,6 @@ copies: [uid] @reverse .
 schoolYear: int @index(int) .
 level: string @index(fulltext) .
 subjects: [uid] @reverse .
-marked: bool @index(bool) .
 primary: bool @index(bool) .
 colour: string .
 address: string @index(fulltext) .
@@ -110,11 +111,15 @@ type Group {
   schoolYear
   level
   subjects
-  evaluations
-  marked
   primary
+  subgroups
   colour
   creationDate
+}
+
+type Subgroup {
+  name
+  colour
 }
 
 type School {
@@ -134,12 +139,14 @@ type Student {
   name
   school
   groups
+  subgroups
   copies
   creationDate
 }
 
 type Subject {
   name
+  evaluations
 }
 
 type Teacher {
@@ -150,6 +157,8 @@ type Teacher {
   lastName
   name
   school
+  groups
+  favGroups
   pendingJoin
   evaluations
   evalTemplates

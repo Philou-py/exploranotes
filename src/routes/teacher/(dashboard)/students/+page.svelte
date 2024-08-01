@@ -42,6 +42,7 @@
   let subCounter = 1;
   let subIds = ["sub1"];
   let subjectsFS: HTMLFieldSetElement;
+  let loading = "";
 
   $: {
     let searchTextSlug = searchText
@@ -63,7 +64,9 @@
 
   const formRefs: Record<string, HTMLFormElement> = {};
 
-  const handleDeleteStudent: SubmitFunction = () => {
+  const handleDeleteStudent: SubmitFunction = ({ formData }) => {
+    loading = formData.get("uid") as string;
+
     return async ({ result }) => {
       switch (result.type) {
         case "success":
@@ -79,10 +82,12 @@
         default:
           await applyAction(result);
       }
+      loading = "";
     };
   };
 
   const handleCreateGroup: SubmitFunction = ({ formData }) => {
+    loading = "createGroup";
     selectedStudents.forEach((st, i) => formData.set(`st${i}`, st.key));
 
     return async ({ result }) => {
@@ -101,6 +106,7 @@
         default:
           await applyAction(result);
       }
+      loading = "";
     };
   };
 </script>
@@ -261,6 +267,7 @@
           </p>
           <Button
             disabled={selectedStudents.length === 0}
+            loading={loading === "createGroup"}
             --primary="var(--eden)"
             --secondary="white"
             formSubmit
@@ -385,6 +392,7 @@
                     onConfirm: () => formRefs[key].requestSubmit(),
                   };
                 }}
+                loading={loading === key}
               >
                 <Block />
               </Button>
@@ -397,6 +405,7 @@
 </div>
 
 <style>
+  /* For checks and crosses */
   :global(.students svg) {
     margin: 0 auto;
   }

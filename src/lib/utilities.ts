@@ -27,3 +27,5 @@ export const colours = [
   "chili-pepper",
   "sweet-lilac",
 ];
+
+export const getRandomColour = () => colours[Math.floor(Math.random() * colours.length)];

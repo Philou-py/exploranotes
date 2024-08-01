@@ -69,6 +69,8 @@
       // Lift label when input is not empty, not only on focus
       active = true;
       dirty = true;
+    } else if (!focused) {
+      active = false;
     }
 
     // All variables should be figure for reactivity
@@ -162,7 +164,7 @@
 
   $jesterRed: #9e1030;
   /* Princess blue */
-  $blue: #00539c;
+  $blue: lighten(#00539c, 5%);
   /* Eden */
   $green: lighten(#264e36, 20%);
   /* Fiesta */

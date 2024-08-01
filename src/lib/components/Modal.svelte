@@ -10,7 +10,7 @@
   };
 
   const keyboardClose = (event: KeyboardEvent) => {
-    if (closeOnBgClick && event.code === "Escape") show = false;
+    if (event.code === "Escape") show = false;
   };
 
   // An element will not focus if it is not visible.

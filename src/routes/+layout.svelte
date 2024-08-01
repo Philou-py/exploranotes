@@ -42,27 +42,51 @@
 </script>
 
 <Navigation currentUser={data.currentUser} bind:open={sideBarOpen} bind:clipped={lgScreen}>
-  <svelte:fragment slot="teacherMenu">
+  {#if data.currentUser.accountType === "teacher"}
     <ButtonGroup
       links={[
         ["/teacher/teachers", "Professeurs"],
         ["/teacher/students", "Élèves"],
+        ["/teacher/groups", "Groupes"],
       ]}
+      openByDefault
     >
       <Button
+        slot="trigger"
         variant="text"
         --primary="var(--princess-blue)"
-        block
-        slot="trigger"
+        let:open
         let:toggle
         on:click={toggle}
+        block
       >
         Mon établissement
-        <ChevronDown slot="append" />
+        <ChevronDown slot="append" class={`chevron ${open ? "rotate" : ""}`} />
       </Button>
+
       <Button slot="btn" let:text variant="text" --primary="var(--turmeric)" block>{text}</Button>
     </ButtonGroup>
-  </svelte:fragment>
+
+    <ButtonGroup
+      links={data.favGroups.map((gr) => [`/teacher/groups/${gr.uid}`, gr.name])}
+      openByDefault
+    >
+      <Button
+        slot="trigger"
+        variant="text"
+        --primary="var(--princess-blue)"
+        let:open
+        let:toggle
+        on:click={toggle}
+        block
+      >
+        Groupes favoris
+        <ChevronDown slot="append" class={`chevron ${open ? "rotate" : ""}`} />
+      </Button>
+
+      <Button slot="btn" let:text variant="text" --primary="var(--turmeric)" block>{text}</Button>
+    </ButtonGroup>
+  {/if}
 </Navigation>
 
 <main class:pushLeft={sideBarOpen && lgScreen}>

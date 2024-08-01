@@ -4,8 +4,8 @@ import { db } from "$lib/dgraph";
 import { Mutation } from "dgraph-js";
 import jwt from "jsonwebtoken";
 import { fail, redirect } from "@sveltejs/kit";
-import sendVerifEmail from "./sendVerifEmail.js";
-import { validationFail } from "$lib/utilities.js";
+import sendVerifEmail from "./sendVerifEmail";
+import { validationFail } from "$lib/utilities";
 
 // https://github.com/auth0/node-jsonwebtoken/issues/963
 const { sign } = jwt;

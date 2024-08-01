@@ -1,6 +1,7 @@
 <script lang="ts">
   import { lighten } from "$lib/utilities";
   import Button from "$lib/components/Button.svelte";
+  import Dialog from "$lib/components/Dialog.svelte";
   import AccountCircle from "svelte-material-icons/AccountCircle.svelte";
   import TextField from "$lib/components/TextField.svelte";
   import Card from "components/Card.svelte";
@@ -36,6 +37,10 @@
 </svelte:head>
 
 <section>
+  <Button variant="outlined" --primary="var(--teal)" size="large">
+    Hello, world!
+    <AccountCircle slot="append" />
+  </Button>
   <Button variant="outlined" disabled>
     <AccountCircle slot="append" />
     Hello, <strong>world</strong>!</Button
@@ -44,10 +49,34 @@
     <AccountCircle slot="append" />
     Hello, <strong>world</strong>!</Button
   >
-  <Button variant="outlined" size="medium" --primary="var(--indigo)" --secondary="white">
-    <AccountCircle slot="append" />
-    Hello, <strong>world</strong>!</Button
-  >
+
+  <div style="margin-top: 100vh; margin-left: 180px">
+    <Dialog width="300px">
+      <TextField
+        type="url"
+        label="Hello, world!"
+        placeholder="Hello, world!"
+        required
+        hint="Hello, world!"
+        bind:value
+      >
+        <AccountCircle slot="prepend" />
+      </TextField>
+      <Button
+        slot="trigger"
+        let:toggle
+        variant="outlined"
+        size="medium"
+        --primary="var(--indigo)"
+        --secondary="white"
+        on:click={toggle}
+      >
+        <AccountCircle slot="append" />
+        Hello, <strong>world</strong>!
+      </Button>
+    </Dialog>
+  </div>
+
   <form method="POST" action="signout" use:enhance={handleSignOut} style="display: inline">
     <Button
       variant="elevated"

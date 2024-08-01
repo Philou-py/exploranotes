@@ -8,7 +8,7 @@
   const toggle = () => (open = !open);
 </script>
 
-<slot name="trigger" {toggle} />
+<slot name="trigger" {toggle} {open} />
 {#if open}
   <div transition:slide={{ duration: 250 }}>
     <slot />
@@ -23,5 +23,13 @@
 <style>
   div {
     margin-left: 10px;
+  }
+
+  :global(.chevron) {
+    transition: transform 300ms;
+  }
+
+  :global(.chevron.rotate) {
+    transform: rotate(-0.5turn);
   }
 </style>

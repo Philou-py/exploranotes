@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { SubmitFunction } from "@sveltejs/kit";
-  import type { MsgReturn } from "./+page.server";
   import Modal from "components/Modal.svelte";
   import Button from "components/Button.svelte";
   import TextField from "components/TextField.svelte";
@@ -46,7 +45,7 @@
   };
 </script>
 
-<Modal show={modalOpen} --width="clamp(400px, 40%, 600px)">
+<Modal bind:show={modalOpen} --width="clamp(400px, 40%, 600px)">
   <div class="card">
     <header>
       <h2 class="cardTitle center">Modifier un élève</h2>
