@@ -55,7 +55,7 @@
     filteredStudents = students.filter(
       ({ primGroups, nameSlug }) =>
         nameSlug.includes(searchTextSlug) &&
-        (!selectedGroup || primGroups?.some(({ name }) => name === selectedGroup)),
+        (!selectedGroup || primGroups?.some(({ uid }) => uid === selectedGroup)),
     );
   }
 
@@ -167,7 +167,12 @@
         <div style="display: flex; align-items: center; gap: 0.5em;">
           <span>{name}</span>
           <a href={`groups/${key}`} tabindex="-1">
-            <Button variant="text" --primary="var(--fiesta)" icon>
+            <Button
+              variant="text"
+              --primary="var(--fiesta)"
+              title="Aller sur la page du groupe"
+              icon
+            >
               <ArrowRight />
             </Button>
           </a>
@@ -186,6 +191,7 @@
             urlSearchParams.set("editGroup", key);
             goto(`?${urlSearchParams.toString()}`, { replaceState: true });
           }}
+          title="Modifier ce groupe"
           disabled={!isAdmin}
           icon
         >
@@ -205,7 +211,7 @@
             <legend>Informations générales</legend>
             <TextField
               name="name"
-              value={data.groupPrefill.name}
+              bind:value={data.groupPrefill.name}
               label="Nom du groupe"
               placeholder="Ex : Spé Maths Gr 7"
               hint="Ce nom devrait être unique dans l'établissement."
@@ -216,7 +222,7 @@
             </TextField>
             <TextField
               name="level"
-              value={data.groupPrefill.level}
+              bind:value={data.groupPrefill.level}
               label="Niveau"
               placeholder="Ex : Terminale"
               maxlength={40}
@@ -225,7 +231,11 @@
               <School slot="prepend" />
             </TextField>
 
-            <Checkbox name="primary" checked={data.groupPrefill.primary}>
+            <Checkbox
+              name="primary"
+              bind:checked={data.groupPrefill.primary}
+              style="margin: 0.5em 0"
+            >
               <svelte:fragment slot="right">
                 Groupe principal (idéalement, un par élève)
               </svelte:fragment>
@@ -234,6 +244,12 @@
 
           <fieldset class="subjects" bind:this={subjectsFS}>
             <legend>Matières enseignées</legend>
+            {#if data.groupToEdit}
+              <p>
+                La modification ou la suppression d&rsquo;une matière s&rsquo;effectue sur sa page
+                dédiée.
+              </p>
+            {/if}
             {#each subIds as subject, i (subject)}
               <div transition:slide={{ duration: 300 }} class="subject">
                 <TextField
@@ -335,9 +351,9 @@
         <div class="newGroup">
           <p>
             {#if selectedStudents.length === 1}
-              {selectedStudents.length} élève sera inclus(e) dans le nouveau groupe.
+              {selectedStudents.length} élève sera inclus(e) dans le groupe.
             {:else}
-              {selectedStudents.length} élèves seront inclus(es) dans le nouveau groupe.
+              {selectedStudents.length} élèves seront inclus(es) dans le groupe.
             {/if}
           </p>
           <Button
@@ -452,6 +468,7 @@
                 editStudent = { uid: key, firstName, lastName, email, hasAccount };
                 editModalOpen = true;
               }}
+              title="Modifier les informations de l’élève"
               icon
             >
               <AccountEdit />
@@ -589,6 +606,11 @@
     background-color: var(--turmeric);
     color: white;
     padding: 0.15em 0.3em;
+  }
+
+  .subjects p {
+    text-align: center;
+    margin: 0.5em 0;
   }
 
   .subject {

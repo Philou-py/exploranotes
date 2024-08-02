@@ -69,13 +69,13 @@
 
 <div class="container">
   <h1>
-    Groupe {data.name}<br />
+    {data.name}<br />
     <span style="font-size: 80%">{data.level}</span>
   </h1>
 
   <section class="subjects">
     {#each data.subjects as subject, i (subject.uid)}
-      <a href={`${data.uid}/subjects/${subject.uid}`} tabindex="-1">
+      <a href={`/teacher/subjects/${subject.uid}`} tabindex="-1">
         <Button
           variant="outlined"
           --primary={`var(--${colours[i]})`}

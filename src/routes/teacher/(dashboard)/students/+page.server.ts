@@ -16,6 +16,7 @@ interface StudentsQuery {
       email: string;
       hasAccount: boolean;
       primGroups?: {
+        uid: string;
         name: string;
         colour: string;
       }[];
@@ -56,6 +57,7 @@ export const load = async ({ locals, depends, url }) => {
           email
           hasAccount: verifiedEmail
           primGroups: groups @filter(eq(primary, true)) (orderasc: name) {
+            uid
             name
             colour
           }
@@ -197,13 +199,8 @@ const NewGroup = z.object({
 });
 
 interface CreateGroupQuery {
-  scCheck: {
-    allInSchool: boolean;
-  }[];
-  grCheck: {
-    isAdmin: boolean;
-    allInGroup: boolean;
-  }[];
+  scCheck: { allInSchool: boolean }[];
+  grCheck: { isAdmin: boolean }[];
 }
 
 export const actions = {
@@ -534,11 +531,6 @@ export const actions = {
           }
         }
         var(func: uid(${schoolUid})) {
-          groups @filter(uid(${newGroup.groupToEdit})) {
-            nbRemSt as count(~groups @filter(type(Student) and uid(${removeStudents.join(", ")})))
-          }
-        }
-        var(func: uid(${schoolUid})) {
           nbStudents as count(~school @filter(type(Student) and uid(${inputStudents.join(", ")})))
         }
         scCheck(func: uid(${schoolUid})) {
@@ -546,17 +538,13 @@ export const actions = {
         }
         grCheck(func: uid(${newGroup.groupToEdit})) {
           isAdmin: math(nbAdmins == 1)
-          allInGroup: math(nbRemSt == ${removeStudents.length})
         }
       }
     `;
     const queryRes = await db.newTxn().query(createGroupQuery);
     const { scCheck, grCheck }: CreateGroupQuery = queryRes.getJson();
 
-    if (
-      !scCheck[0].allInSchool ||
-      (newGroup.groupToEdit && (!grCheck[0].isAdmin || !grCheck[0].allInGroup))
-    )
+    if (!scCheck[0].allInSchool || (newGroup.groupToEdit && !grCheck[0].isAdmin))
       return validationFail();
 
     const newSubjects = Array.from(formData.entries())

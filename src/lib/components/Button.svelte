@@ -153,7 +153,7 @@
   .text {
     --c1: var(--secondary, transparent);
     --c2: var(--primary, black);
-    border: 1px solid var(--c2);
+    outline: 1px solid var(--c2);
   }
 
   .outlined:disabled,
@@ -163,7 +163,7 @@
   }
 
   .text {
-    border: 0;
+    outline: 0;
   }
 
   .small {

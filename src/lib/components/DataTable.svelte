@@ -117,6 +117,7 @@
   :global(.flexCenter) {
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 0.2em;
     flex-wrap: wrap;
   }

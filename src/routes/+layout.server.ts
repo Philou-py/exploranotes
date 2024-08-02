@@ -3,14 +3,14 @@ import { db } from "$lib/dgraph";
 const sideBarQuery = `
   query SideBarQuery($userUid: string) {
     var(func: uid($userUid)) {
-      subjects as favSubjects {
+      subjects as ~favTeachers {
         groups as ~subjects
       }
     }
-    favGroups(func: uid(groups)) {
+    favGroups(func: uid(groups), orderasc: name) {
       uid
       name
-      favSubjects: subjects @filter(uid(subjects)) {
+      favSubjects: subjects @filter(uid(subjects)) (orderasc: name) {
         uid
         name
       }

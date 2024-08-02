@@ -5,32 +5,34 @@ import { Mutation } from "dgraph-js";
 import { z } from "zod";
 
 const groupQuery = `
-  query GroupQuery($userUid: string, $groupUid: string) {
-    groups(func: uid($groupUid)) {
-      name
-      level
-      admins: ~groups @filter(type(Teacher)) {
-        uid
+  query GroupQuery($userUid: string, $groupUid: string, $schoolUid: string) {
+    schools(func: uid($schoolUid)) {
+      groups @filter(uid($groupUid)) {
         name
-      }
-      students: ~groups @filter(type(Student)) {
-        key: uid
-        firstName
-        lastName
-        subgroups(orderasc: name) @filter(uid_in(~subgroups, $groupUid)) {
+        level
+        admins: ~groups @filter(type(Teacher)) {
+          uid
+          name
+        }
+        students: ~groups @filter(type(Student)) {
+          key: uid
+          firstName
+          lastName
+          subgroups(orderasc: name) @filter(uid_in(~subgroups, $groupUid)) {
+            uid
+            name
+            colour
+          }
+        }
+        subjects(orderasc: name) {
+          uid
+          name
+        }
+        subgroups(orderasc: name) {
           uid
           name
           colour
         }
-      }
-      subjects(orderasc: name) {
-        uid
-        name
-      }
-      subgroups(orderasc: name) {
-        uid
-        name
-        colour
       }
     }
   }
@@ -43,34 +45,34 @@ interface Subgroup {
 }
 
 interface GroupQuery {
-  groups: {
-    name: string;
-    level: string;
-    admins: { uid: string; name: string }[];
-    students?: {
-      key: string;
-      firstName: string;
-      lastName: string;
-      subgroups?: Subgroup[];
-    }[];
-    subjects?: { uid: string; name: string }[];
-    subgroups?: {
-      uid: string;
+  schools: {
+    groups: {
       name: string;
-      colour: string;
+      level: string;
+      admins: { uid: string; name: string }[];
+      students?: {
+        key: string;
+        firstName: string;
+        lastName: string;
+        subgroups?: Subgroup[];
+      }[];
+      subjects?: { uid: string; name: string }[];
+      subgroups?: Subgroup[];
     }[];
   }[];
 }
 
 export const load = async ({ params, locals, depends }) => {
   depends("app:groupDetails");
-  const queryRes = await db
-    .newTxn()
-    .queryWithVars(groupQuery, { $userUid: locals.currentUser.uid, $groupUid: params.groupId });
-  const { groups }: GroupQuery = queryRes.getJson();
+  const queryRes = await db.newTxn().queryWithVars(groupQuery, {
+    $userUid: locals.currentUser.uid,
+    $groupUid: params.groupId,
+    $schoolUid: locals.currentUser.school.uid,
+  });
+  const { schools }: GroupQuery = queryRes.getJson();
 
-  if (groups.length === 0) error(404, "Oups ! Il semblerait que ce groupe n’existe pas !");
-  const group = groups[0];
+  if (schools.length === 0) error(404, "Oups ! Il semblerait que ce groupe n’existe pas !");
+  const group = schools[0].groups[0];
 
   return {
     uid: params.groupId,
@@ -134,7 +136,7 @@ export const actions = {
     const queryRes = await db.newTxn().queryWithVars(addSubgroupQuery, {
       $userUid: locals.currentUser.uid,
       $groupUid: params.groupId,
-      $subgroupName: subgroupName.toLowerCase(),
+      $subgroupName: subgroupName,
     });
     const { groups, teachers }: AddSubgroupQuery = queryRes.getJson();
 
@@ -148,6 +150,7 @@ export const actions = {
     const txn = db.newTxn();
     const mutation = new Mutation();
     mutation.setSetJson({
+      "dgraph.type": "Subgroup",
       uid: params.groupId,
       subgroups: { name: subgroupName, colour: getRandomColour() },
     });

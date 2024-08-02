@@ -85,10 +85,7 @@
 
       {#each data.favGroups as favGroup (favGroup.uid)}
         <ButtonGroup
-          links={favGroup.favSubjects.map((sub) => [
-            `/teacher/groups/${favGroup.uid}/subjects/${sub.uid}`,
-            sub.name,
-          ])}
+          links={favGroup.favSubjects.map((sub) => [`/teacher/subjects/${sub.uid}`, sub.name])}
           openByDefault
         >
           <a

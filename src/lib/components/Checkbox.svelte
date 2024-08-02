@@ -9,9 +9,9 @@
   export { className as class };
 </script>
 
-<label {title}>
+<label {title} {style}>
   <slot name="left" />
-  <input type="checkbox" bind:checked bind:value {disabled} {name} {style} class={className} />
+  <input type="checkbox" bind:checked bind:value on:change {disabled} {name} class={className} />
   <slot name="right" />
 </label>
 
@@ -21,14 +21,13 @@
 
   label {
     display: block;
-    padding: 0.5em 0;
   }
 
   input {
     width: 1.4em;
     height: 1.4em;
     vertical-align: bottom;
-    margin-right: 0.5em;
+    margin: 0 0.5em;
     accent-color: $blue;
   }
 </style>
