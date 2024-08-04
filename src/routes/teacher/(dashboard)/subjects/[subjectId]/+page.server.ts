@@ -30,12 +30,12 @@ const subjectQuery = `
         students: ~groups @filter(type(Student)) {
           key: uid
           name
-          subgroups {
+          subgroups: ~students @filter(type(Subgroup)) {
             name
             colour
           }
         }
-        subgroups {
+        subgroups: ~group @filter(type(Subgroup)) {
           name
           colour
         }

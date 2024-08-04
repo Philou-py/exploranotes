@@ -422,8 +422,6 @@ export const actions = {
 
     const txn = db.newTxn();
     const mutation = new Mutation();
-    console.log(student);
-    console.log(studentDelete);
     mutation.setSetJson(student);
     mutation.setDeleteJson(studentDelete);
 

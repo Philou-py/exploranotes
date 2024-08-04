@@ -4,9 +4,10 @@ firstName: string @index(hash) .
 lastName: string @index(hash) .
 name: string @index(fulltext) .
 verifiedEmail: bool @index(bool) .
+group: uid @reverse .
 groups: [uid] @reverse .
 favTeachers: [uid] @reverse .
-subgroups: [uid] @reverse .
+students: [uid] @reverse .
 school: uid @reverse .
 pendingJoin: uid @reverse .
 evaluations: [uid] @reverse .
@@ -114,7 +115,6 @@ type Group {
   level
   subjects
   primary
-  subgroups
   colour
   creationDate
 }
@@ -122,6 +122,8 @@ type Group {
 type Subgroup {
   name
   colour
+  group
+  students
 }
 
 type School {
@@ -141,7 +143,6 @@ type Student {
   name
   school
   groups
-  subgroups
   copies
   creationDate
 }

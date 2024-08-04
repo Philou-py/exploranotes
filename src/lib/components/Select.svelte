@@ -29,8 +29,12 @@
     if (!persistentHint) message = "";
   };
 
-  // Lift label when input is not empty, not only on focus
-  $: if (value) active = true;
+  $: {
+    // Lift label when input is not empty, not only on focus
+    // Avoid lifted label whith an invalid item selected
+    if (value && items.some(([v, _]) => v === value)) active = true;
+    else if (!focused) active = false;
+  }
 </script>
 
 <div class="textField" class:focused class:disabled={disabled || readonly}>

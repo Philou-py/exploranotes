@@ -18,7 +18,7 @@ const groupQuery = `
           key: uid
           firstName
           lastName
-          subgroups(orderasc: name) @filter(uid_in(~subgroups, $groupUid)) {
+          subgroups: ~students(orderasc: name) @filter(type(Subgroup) and uid_in(group, $groupUid)) {
             uid
             name
             colour
@@ -28,7 +28,7 @@ const groupQuery = `
           uid
           name
         }
-        subgroups(orderasc: name) {
+        subgroups: ~group (orderasc: name) @filter(type(Subgroup)) {
           uid
           name
           colour
@@ -90,7 +90,7 @@ export const load = async ({ params, locals, depends }) => {
 const addSubgroupQuery = `
   query AddSubgroupQuery($userUid: string, $groupUid: string, $subgroupName: string) {
     groups(func: uid($groupUid)) @filter(uid_in(~groups, $userUid)) {
-      nb: count(subgroups @filter(eq(name, $subgroupName)))
+      nb: count(~group @filter(type(Subgroup) and eq(name, $subgroupName)))
     }
     teachers(func: uid($userUid)) @normalize {
       admin: count(groups @filter(uid($groupUid)))
@@ -114,7 +114,7 @@ const ManageSubgroup = z.object({
 const checkSubgroupQuery = `
   query CheckSubgroupQuery($stUid: string, $sgUid: string, $teacherUid: string, $groupUid: string) {
     students(func: uid($stUid)) {
-      existant: count(subgroups @filter(uid($sgUid)))
+      existant: count(~students @filter(type(Subgroup) and uid($sgUid)))
     }
     teachers(func: uid($teacherUid)) {
       admin: count(groups @filter(uid($groupUid)))
@@ -125,6 +125,25 @@ const checkSubgroupQuery = `
 interface CheckSubgroupQuery {
   students: { existant: number }[];
   teachers: { admin: number }[];
+}
+
+const delSubgroupQuery = `
+  query DelSubgroupQuery($sgUid: string, $userUid: string) {
+    subgroups(func: uid($sgUid)) {
+      name
+      group {
+        uid
+        admin: count(~groups @filter(uid($userUid)))
+      }
+    }
+  }
+`;
+
+interface DelSubgroupQuery {
+  subgroups: {
+    name: string;
+    group: { uid: string; admin: number };
+  }[];
 }
 
 export const actions = {
@@ -151,14 +170,43 @@ export const actions = {
     const mutation = new Mutation();
     mutation.setSetJson({
       "dgraph.type": "Subgroup",
-      uid: params.groupId,
-      subgroups: { name: subgroupName, colour: getRandomColour() },
+      name: subgroupName,
+      colour: getRandomColour(),
+      group: { uid: params.groupId },
     });
 
     await txn.mutate(mutation);
     await txn.commit();
 
     return { message: `Le sous-groupe ${subgroupName} a bien été créé !` };
+  },
+
+  delSubgroup: async ({ request, locals, params }) => {
+    const formData = await request.formData();
+    const subgroupUid = formData.get("sgUid");
+
+    if (!subgroupUid || typeof subgroupUid !== "string") return validationFail();
+
+    const queryRes = await db
+      .newTxn()
+      .queryWithVars(delSubgroupQuery, { $sgUid: subgroupUid, $userUid: locals.currentUser.uid });
+    const { subgroups }: DelSubgroupQuery = queryRes.getJson();
+
+    if (subgroups.length === 0 || subgroups[0].group.uid !== params.groupId)
+      return validationFail();
+    if (subgroups[0].group.admin !== 1)
+      return fail(403, {
+        message: "Pour supprimer un sous-groupe, vous devez être administrateur !",
+      });
+
+    const txn = db.newTxn();
+    const mutation = new Mutation();
+    mutation.setDeleteJson({ uid: subgroupUid });
+
+    await txn.mutate(mutation);
+    await txn.commit();
+
+    return { message: `Le sous-groupe ${subgroups[0].name} a bien été supprimé !` };
   },
 
   addRemSubgroup: async ({ request, params, locals }) => {
@@ -188,13 +236,13 @@ export const actions = {
     const mutation = new Mutation();
     if (students[0].existant)
       mutation.setDeleteJson({
-        uid: newJoin.stUid,
-        subgroups: { uid: newJoin.sgUid },
+        uid: newJoin.sgUid,
+        students: { uid: newJoin.stUid },
       });
     else
       mutation.setSetJson({
-        uid: newJoin.stUid,
-        subgroups: { uid: newJoin.sgUid },
+        uid: newJoin.sgUid,
+        students: { uid: newJoin.stUid },
       });
 
     await txn.mutate(mutation);

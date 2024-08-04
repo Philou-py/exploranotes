@@ -19,17 +19,17 @@
   import Select from "components/Select.svelte";
 
   export let data;
-  let showDialog = false;
+  let showAddDialog = false;
+  let showDelDialog = false;
 
   let loading = "";
-  const handleAddSubgroup: SubmitFunction = () => {
-    loading = "addSubgroup";
-
+  const handleAddDelSubgroup: SubmitFunction = () => {
     return async ({ result }) => {
       switch (result.type) {
         case "success":
           invalidate("app:groupDetails");
-          showDialog = false;
+          showAddDialog = false;
+          showDelDialog = false;
           snackBars.haveASnack(result.data!.message);
           break;
         case "failure":
@@ -49,7 +49,6 @@
     loading = formData.get("stUid") as string;
 
     return async ({ result }) => {
-      console.log("hi");
       switch (result.type) {
         case "success":
           invalidate("app:groupDetails");
@@ -62,7 +61,6 @@
           await applyAction(result);
       }
       loading = "";
-      console.log("hi");
     };
   };
 </script>
@@ -101,10 +99,13 @@
       <p>Aucun sous-groupe n&rsquo;a été créé !</p>
     {/if}
 
-    <Dialog bind:show={showDialog} width="300px" --primary={lighten("var(--pepper-stem)", 80)}>
+    <Dialog bind:show={showAddDialog} width="300px" --primary={lighten("var(--pepper-stem)", 80)}>
       <Button
         slot="trigger"
-        on:click={() => (showDialog = !showDialog)}
+        on:click={() => {
+          showAddDialog = !showAddDialog;
+          showDelDialog = false;
+        }}
         variant="text"
         --primary="var(--pepper-stem)"
         style="margin-left: 1em;"
@@ -117,7 +118,10 @@
       <form
         method="POST"
         action="?/addSubgroup"
-        use:enhance={handleAddSubgroup}
+        use:enhance={(e) => {
+          loading = "addSubgroup";
+          return handleAddDelSubgroup(e);
+        }}
         class="dialogContent"
       >
         <TextField name="name" label="Nom" placeholder="Exs : si, I, 1, B" required>
@@ -136,6 +140,56 @@
         </Button>
       </form>
     </Dialog>
+
+    {#if data.subgroups.length > 0}
+      <Dialog bind:show={showDelDialog} width="300px" --primary={lighten("var(--pepper-stem)", 80)}>
+        <Button
+          slot="trigger"
+          on:click={() => {
+            showDelDialog = !showDelDialog;
+            showAddDialog = false;
+          }}
+          variant="text"
+          --primary="var(--fiesta)"
+          title="Supprimer des sous-groupes"
+          shrinkToIcon
+        >
+          <Delete slot="prepend" />
+          Supprimer
+        </Button>
+
+        <form
+          method="POST"
+          action="?/delSubgroup"
+          use:enhance={(e) => {
+            loading = "delSubgroup";
+            return handleAddDelSubgroup(e);
+          }}
+          class="dialogContent"
+        >
+          <Select
+            name="sgUid"
+            items={data.subgroupsItems}
+            label="Sous-groupe"
+            persistentHint
+            required
+          >
+            <AccountGroup slot="prepend" />
+          </Select>
+
+          <Button
+            formSubmit
+            variant="text"
+            --primary="var(--eden)"
+            --secondary="transparent"
+            loading={loading === "delSubgroup"}
+            icon
+          >
+            <Send />
+          </Button>
+        </form>
+      </Dialog>
+    {/if}
   </div>
 
   <DataTable
