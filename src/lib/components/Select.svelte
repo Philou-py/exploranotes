@@ -2,11 +2,12 @@
   import InputField from "./InputField.svelte";
   import { slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import { alternateColours } from "$lib/utilities";
 
   export let value = "";
   export let name = "";
   export let label = "";
-  export let items: [string, string][] = [];
+  export let items: [string, string][] | [string, string, string][] = [];
   export let disabled = false;
   export let readonly = false;
   export let required = false;
@@ -57,8 +58,12 @@
       tabindex={readonly ? -1 : undefined}
     >
       <option value="" hidden />
-      {#each items as [val, text]}
-        <option value={val}>{text}</option>
+      {#each items as [val, text, bgCol]}
+        <option
+          value={val}
+          style:color={(bgCol && alternateColours.get(bgCol)) || "unset"}
+          style:background-color={bgCol || "unset"}>{text}</option
+        >
       {/each}
     </select>
   </InputField>

@@ -83,7 +83,10 @@ export const load = async ({ params, locals, depends }) => {
     students: group.students || [],
     subjects: group.subjects || [],
     subgroups: group.subgroups || [],
-    subgroupsItems: group.subgroups?.map(({ uid, name }) => [uid, name] as [string, string]) || [],
+    subgroupsItems:
+      group.subgroups?.map(
+        ({ uid, name, colour }) => [uid, name, colour] as [string, string, string],
+      ) || [],
   };
 };
 
@@ -171,7 +174,7 @@ export const actions = {
     mutation.setSetJson({
       "dgraph.type": "Subgroup",
       name: subgroupName,
-      colour: getRandomColour(),
+      colour: `var(--${getRandomColour()})`,
       group: { uid: params.groupId },
     });
 

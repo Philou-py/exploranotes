@@ -293,7 +293,7 @@
   }
 
   .highlight {
-    background-color: color-mix(in srgb, var(--blue-stone) 70%, white);
+    background-color: color-mix(in srgb, var(--bluestone) 70%, white);
     color: white;
   }
 </style>

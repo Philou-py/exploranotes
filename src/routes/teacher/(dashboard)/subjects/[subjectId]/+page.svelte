@@ -9,6 +9,7 @@
   import { snackBars } from "components/SnackBars.svelte";
   import { invalidate } from "$app/navigation";
   import Checkbox from "components/Checkbox.svelte";
+  import { alternateColours, lighten } from "$lib/utilities";
 
   export let data;
   let loading = "";
@@ -77,12 +78,13 @@
 
   <div class="subgroups">
     {#each data.subgroups.entries() as [name, colour] (name)}
+      {@const selected = data.selSgs.includes(name)}
       <Button
-        variant={data.selSgs.includes(name) ? "filled" : "outlined"}
-        --primary={`var(--${colour})`}
-        --secondary="white"
+        variant={selected ? "filled" : "outlined"}
+        --primary={colour}
+        --secondary={selected ? alternateColours.get(colour) : "white"}
         on:click={() => {
-          if (data.selSgs.includes(name)) data.selSgs = data.selSgs.filter((sg) => sg !== name);
+          if (selected) data.selSgs = data.selSgs.filter((sg) => sg !== name);
           else data.selSgs = [...data.selSgs, name];
         }}
       >
@@ -129,7 +131,7 @@
         <div class="flexCenter">
           {#if subgroups}
             {#each subgroups as sgName (sgName)}
-              <Chip bgColour={`var(--${data.subgroups.get(sgName)})`}>{sgName}</Chip>
+              <Chip bgColour={data.subgroups.get(sgName)}>{sgName}</Chip>
             {/each}
           {/if}
         </div>

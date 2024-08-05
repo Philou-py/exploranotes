@@ -17,7 +17,7 @@ schoolYear: int @index(int) .
 level: string @index(fulltext) .
 subjects: [uid] @reverse .
 primary: bool @index(bool) .
-colour: string .
+colour: string @index(hash) .
 address: string @index(fulltext) .
 academy: string @index(fulltext) .
 title: string @index(fulltext) .

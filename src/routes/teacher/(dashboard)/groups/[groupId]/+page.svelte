@@ -9,7 +9,7 @@
   import ArrowRight from "svelte-material-icons/ArrowRightThin.svelte";
   import AccountGroup from "svelte-material-icons/AccountGroup.svelte";
   import Delete from "svelte-material-icons/DeleteOutline.svelte";
-  import { colours, lighten } from "$lib/utilities.js";
+  import { alternateColours, colours, lighten } from "$lib/utilities.js";
   import Chip from "components/Chip.svelte";
   import TextField from "components/TextField.svelte";
   import { applyAction, enhance } from "$app/forms";
@@ -91,9 +91,7 @@
 
   <div class="subgroups">
     {#each data.subgroups as subgroup (subgroup.uid)}
-      <Button variant="outlined" --primary={`var(--${subgroup.colour})`}>
-        {subgroup.name}
-      </Button>
+      <Chip bgColour={subgroup.colour} size="medium">{subgroup.name}</Chip>
     {/each}
     {#if data.subgroups.length === 0}
       <p>Aucun sous-groupe n&rsquo;a été créé !</p>
@@ -142,7 +140,7 @@
     </Dialog>
 
     {#if data.subgroups.length > 0}
-      <Dialog bind:show={showDelDialog} width="300px" --primary={lighten("var(--pepper-stem)", 80)}>
+      <Dialog bind:show={showDelDialog} width="300px" --primary={lighten("var(--fiesta)", 80)}>
         <Button
           slot="trigger"
           on:click={() => {
@@ -211,7 +209,7 @@
         <div class="flexCenter">
           {#if st.subgroups}
             {#each st.subgroups as subgroup (subgroup.uid)}
-              <Chip bgColour={`var(--${subgroup.colour})`}>{subgroup.name}</Chip>
+              <Chip bgColour={subgroup.colour}>{subgroup.name}</Chip>
             {/each}
           {/if}
 

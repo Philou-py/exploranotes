@@ -8,7 +8,7 @@
   import { enhance, applyAction } from "$app/forms";
   import { snackBars } from "components/SnackBars.svelte";
   import { invalidate } from "$app/navigation";
-    import Chip from "components/Chip.svelte";
+  import Chip from "components/Chip.svelte";
 
   export let data;
   let form: HTMLFormElement;
