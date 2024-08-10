@@ -2,10 +2,11 @@ email: string @index(hash) .
 password: password .
 firstName: string @index(hash) .
 lastName: string @index(hash) .
-name: string @index(fulltext) .
+name: string @index(fulltext, exact) @lang .
 verifiedEmail: bool @index(bool) .
 group: uid @reverse .
 groups: [uid] @reverse .
+teachers: [uid] @reverse .
 favTeachers: [uid] @reverse .
 students: [uid] @reverse .
 school: uid @reverse .
@@ -14,19 +15,19 @@ evaluations: [uid] @reverse .
 evalTemplates: [uid] .
 copies: [uid] @reverse .
 schoolYear: int @index(int) .
-level: string @index(fulltext) .
+level: string @index(fulltext) @lang .
 subjects: [uid] @reverse .
 primary: bool @index(bool) .
 colour: string @index(hash) .
-address: string @index(fulltext) .
-academy: string @index(fulltext) .
-title: string @index(fulltext) .
+address: string @index(fulltext) @lang .
+academy: string @index(fulltext) @lang .
+title: string @index(fulltext) @lang .
 coefficient: float .
 markPrecision: float .
 categories: [uid] @reverse .
 subject: uid @reverse .
 rank: int .
-label: string @index(fulltext) .
+label: string @index(hash) .
 maxPoints: float @index(float) .
 criteria: [uid] @reverse .
 isBonus: bool .
@@ -149,6 +150,7 @@ type Student {
 
 type Subject {
   name
+  teachers
   favTeachers
 }
 

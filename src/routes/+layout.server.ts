@@ -7,12 +7,12 @@ const sideBarQuery = `
         groups as ~subjects
       }
     }
-    favGroups(func: uid(groups), orderasc: name) {
+    favGroups(func: uid(groups), orderasc: name@fr) {
       uid
-      name
-      favSubjects: subjects @filter(uid(subjects)) (orderasc: name) {
+      name: name@fr
+      favSubjects: subjects @filter(uid(subjects)) (orderasc: name@fr) {
         uid
-        name
+        name: name@fr
       }
     }
   }

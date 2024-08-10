@@ -46,52 +46,50 @@
 </script>
 
 <Modal bind:show={modalOpen} --width="clamp(400px, 40%, 600px)">
-  <div class="card">
-    <header>
-      <h2 class="cardTitle center">Modifier un élève</h2>
-    </header>
+  <header>
+    <h2 class="cardTitle center">Modifier un élève</h2>
+  </header>
 
-    <form method="POST" action="?/editStudent" use:enhance={handleEditStudent}>
-      <TextField name="firstName" label="Prénom" value={student.firstName} required>
-        <FaceShimmer slot="prepend" />
-      </TextField>
-      <TextField name="lastName" label="Nom de famille" value={student.lastName} required>
-        <Face slot="prepend" />
-      </TextField>
-      <TextField
-        type="email"
-        name="email"
-        label="Adresse électronique"
-        value={student.email}
-        hint="Laisser vide si inconnue"
-        readonly={student.hasAccount}
+  <form method="POST" action="?/editStudent" use:enhance={handleEditStudent}>
+    <TextField name="firstName" label="Prénom" value={student.firstName} required>
+      <FaceShimmer slot="prepend" />
+    </TextField>
+    <TextField name="lastName" label="Nom de famille" value={student.lastName} required>
+      <Face slot="prepend" />
+    </TextField>
+    <TextField
+      type="email"
+      name="email"
+      label="Adresse électronique"
+      value={student.email}
+      hint="Laisser vide si inconnue"
+      readonly={student.hasAccount}
+    >
+      <AccountCircle slot="prepend" />
+    </TextField>
+    <input type="hidden" name="uid" value={student.uid} />
+
+    {#if !student.hasAccount}
+      <p class="center">
+        Si vous connaissez l&rsquo;adresse électronique de l&rsquo;élève en question et que vous
+        l&rsquo;inscrivez ici, un compte utilisant cette adresse aura directement accès à
+        l&rsquo;établissement et à ses données crées par les professeurs.
+      </p>
+    {/if}
+
+    <div class="cardActions">
+      <Button variant="text" --primary="var(--jester-red)" on:click={() => (modalOpen = false)}>
+        Annuler
+      </Button>
+      <Button
+        variant="outlined"
+        formSubmit
+        {loading}
+        --primary="var(--princess-blue)"
+        --secondary="white"
       >
-        <AccountCircle slot="prepend" />
-      </TextField>
-      <input type="hidden" name="uid" value={student.uid} />
-
-      {#if !student.hasAccount}
-        <p class="center">
-          Si vous connaissez l&rsquo;adresse électronique de l&rsquo;élève en question et que vous
-          l&rsquo;inscrivez ici, un compte utilisant cette adresse aura directement accès à
-          l&rsquo;établissement et à ses données crées par les professeurs.
-        </p>
-      {/if}
-
-      <div class="cardActions">
-        <Button variant="text" --primary="var(--jester-red)" on:click={() => (modalOpen = false)}>
-          Annuler
-        </Button>
-        <Button
-          variant="outlined"
-          formSubmit
-          {loading}
-          --primary="var(--princess-blue)"
-          --secondary="white"
-        >
-          Valider
-        </Button>
-      </div>
-    </form>
-  </div>
+        Valider
+      </Button>
+    </div>
+  </form>
 </Modal>

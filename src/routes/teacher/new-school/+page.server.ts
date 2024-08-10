@@ -24,7 +24,7 @@ export const actions = {
       error,
       data: newSchool,
     } = NewSchool.safeParse({
-      name: formData.get("schoolName"),
+      "name@fr": formData.get("schoolName"),
       address: formData.get("schoolAddress"),
       academy: formData.get("academy"),
     });

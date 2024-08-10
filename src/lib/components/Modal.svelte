@@ -1,21 +1,25 @@
 <script lang="ts">
   export let show = false;
   export let closeOnBgClick = false;
+  export let closeFunc = () => {
+    show = false;
+  };
   let bgElt: HTMLDivElement;
 
   const handleBgClick = (event: MouseEvent) => {
-    if (closeOnBgClick && event.target === bgElt) {
-      show = false;
-    }
+    if (closeOnBgClick && event.target === bgElt) closeFunc();
   };
 
   const keyboardClose = (event: KeyboardEvent) => {
-    if (event.code === "Escape") show = false;
+    if (event.code === "Escape") closeFunc();
   };
 
-  // An element will not focus if it is not visible.
-  $: if (show && bgElt)
+  $: if (show && bgElt) {
+    // If the modal is opened without transition
+    bgElt.focus();
+    // An element will not focus if it is not visible.
     bgElt.addEventListener("transitionend", () => bgElt.focus(), { once: true });
+  }
 </script>
 
 <div
@@ -27,7 +31,7 @@
   tabindex="-1"
   role="presentation"
 >
-  <div class="modal">
+  <div class="modal card">
     <slot />
   </div>
 </div>
@@ -54,10 +58,11 @@
   }
 
   .modal {
+    position: relative;
     width: var(--width);
+    overflow: auto;
     max-width: 95%;
     max-height: 95%;
-    overflow: auto;
     visibility: hidden;
     transform: scale(40%);
     transition:

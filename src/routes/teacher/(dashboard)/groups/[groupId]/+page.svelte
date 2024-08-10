@@ -129,7 +129,7 @@
         <Button
           formSubmit
           variant="text"
-          --primary="var(--eden)"
+          --primary="var(--pepper-stem)"
           --secondary="transparent"
           loading={loading === "addSubgroup"}
           icon
@@ -178,7 +178,7 @@
           <Button
             formSubmit
             variant="text"
-            --primary="var(--eden)"
+            --primary="var(--fiesta)"
             --secondary="transparent"
             loading={loading === "delSubgroup"}
             icon
@@ -254,7 +254,7 @@
               <Button
                 formSubmit
                 variant="text"
-                --primary="var(--eden)"
+                --primary="var(--toffee)"
                 --secondary="transparent"
                 loading={loading === st.key}
                 icon

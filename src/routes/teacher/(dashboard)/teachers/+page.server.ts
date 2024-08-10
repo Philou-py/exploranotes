@@ -38,7 +38,7 @@ const teachersQuery = `
           name
           email
           groups @filter(eq(primary, true)) {
-            name
+            name: name@fr
             colour
           }
         }

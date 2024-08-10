@@ -67,177 +67,171 @@
 </Button>
 
 <Modal bind:show={modalOpen}>
-  <div class="card">
-    <header>
-      <h2 class="cardTitle center">Ajouter des élèves</h2>
-    </header>
+  <header>
+    <h2 class="cardTitle center">Ajouter des élèves</h2>
+  </header>
 
-    <form method="POST" action="?/addStudents" use:enhance={handleSubmitStudents} bind:this={form}>
-      {#each newStudentIds as id (id)}
-        <section class="group" transition:slide>
-          <div class="newStudent">
-            <div class="textFields">
-              <TextField name={`${id}:firstName`} label="Prénom" required>
-                <FaceShimmer slot="prepend" />
-              </TextField>
-              <TextField name={`${id}:lastName`} label="Nom de famille" required>
-                <Face slot="prepend" />
-              </TextField>
-              <TextField
-                type="email"
-                name={`${id}:email`}
-                label="Adresse électronique"
-                hint="Laisser vide si inconnue"
-              >
-                <AccountCircle slot="prepend" />
-              </TextField>
-            </div>
-            <Button
-              variant="text"
-              size="small"
-              tabindex={-1}
-              --primary="var(--jester-red)"
-              disabled={newStudentIds.length === 1}
-              on:click={() => (newStudentIds = newStudentIds.filter((stId) => stId !== id))}
-              icon
+  <form method="POST" action="?/addStudents" use:enhance={handleSubmitStudents} bind:this={form}>
+    {#each newStudentIds as id (id)}
+      <section class="group" transition:slide>
+        <div class="newStudent">
+          <div class="textFields">
+            <TextField name={`${id}:firstName`} label="Prénom" required>
+              <FaceShimmer slot="prepend" />
+            </TextField>
+            <TextField name={`${id}:lastName`} label="Nom de famille" required>
+              <Face slot="prepend" />
+            </TextField>
+            <TextField
+              type="email"
+              name={`${id}:email`}
+              label="Adresse électronique"
+              hint="Laisser vide si inconnue"
             >
-              <Delete />
-            </Button>
+              <AccountCircle slot="prepend" />
+            </TextField>
           </div>
-          <hr />
-        </section>
-      {/each}
-
-      <div class="add">
-        <Button
-          variant="outlined"
-          --primary={darken("var(--pepper-stem)", 20)}
-          on:click={handleAdd}
-        >
-          <Plus slot="prepend" />
-          Nouvel élève
-        </Button>
-      </div>
-
-      {#if summaryItems}
-        <div class="summary" transition:slide>
-          <p class="center">
-            Les élèves dont l&rsquo;adresse électronique correspond à celle d&rsquo;un élève déjà
-            inscrit dans un autre établissement, ou à celle d&rsquo;un professeur existant, seront
-            ignorés.
-          </p>
-
-          <p class="center">
-            En revanche, si une adresse électronique correspond à celle d&rsquo;un élève sans
-            établissement, celui-ci sera affecté au vôtre et son nom sera modifié.
-          </p>
-
-          <p class="center">
-            Si vous tentez d&rsquo;ajouter plusieurs élèves avec le même nom et sans adresse
-            électronique, seulement l&rsquo;un d&rsquo;entre eux sera pris en compte.
-          </p>
-
-          <p class="center">
-            Renseigner des informations associées à l&rsquo;adresse électronique d&rsquo;un élève de
-            l&rsquo;établissement n&rsquo;aura aucun impact.
-          </p>
-
-          <DataTable
-            headers={[
-              { value: "name", text: "Nom" },
-              { value: "email", text: "Adresse électronique" },
-              { value: "existingAccount", text: "Compte existant" },
-              { value: "schoolStatus", text: "Établissement" },
-              { value: "isTeacher", text: "Professeur" },
-              { value: "duplicate", text: "Doublon" },
-            ]}
-            items={summaryItems}
-            lineNumbering
+          <Button
+            variant="text"
+            size="small"
+            tabindex={-1}
+            --primary="var(--jester-red)"
+            disabled={newStudentIds.length === 1}
+            on:click={() => (newStudentIds = newStudentIds.filter((stId) => stId !== id))}
+            icon
           >
-            <tr
-              slot="item"
-              let:item={{ name, email, existingAccount, schoolStatus, isTeacher, duplicate }}
-              let:lineNumber
-              class:highlight={schoolStatus !== "none" || isTeacher || duplicate}
-            >
-              <td class="center">{lineNumber}</td>
-              <td>{name}</td>
-              <td class="breakAll">{email}</td>
-              <td>
-                {#if existingAccount}
-                  <Check />
-                {:else}
-                  <Close />
-                {/if}
-              </td>
-              <td class="center">
-                {#if schoolStatus === "current"}
-                  <span class="bad">Déjà présent(e)</span>
-                {:else if schoolStatus === "other"}
-                  <span class="bad">Autre</span>
-                {:else}
-                  Aucun
-                {/if}
-              </td>
-              <td>
-                {#if isTeacher}
-                  <span class="bad"><Check /></span>
-                {:else}
-                  <Close />
-                {/if}
-              </td>
-              <td>
-                {#if duplicate}
-                  <span class="bad"><Check /></span>
-                {:else}
-                  <Close />
-                {/if}
-              </td>
-            </tr>
-          </DataTable>
-
-          <p class="center">
-            Les lignes en fond gris requierent votre attention et seront ignorées si vous validez le
-            formulaire.
-          </p>
+            <Delete />
+          </Button>
         </div>
-      {/if}
+        <hr />
+      </section>
+    {/each}
 
-      <div class="cardActions">
-        <Button variant="text" --primary="var(--jester-red)" on:click={() => (modalOpen = false)}>
-          Annuler
-        </Button>
-        <!-- The first submit button will be used when pressing 'Enter' -->
+    <div class="add">
+      <Button variant="outlined" --primary={darken("var(--pepper-stem)", 20)} on:click={handleAdd}>
+        <Plus slot="prepend" />
+        Nouvel élève
+      </Button>
+    </div>
+
+    {#if summaryItems}
+      <div class="summary" transition:slide>
+        <p class="center">
+          Les élèves dont l&rsquo;adresse électronique correspond à celle d&rsquo;un élève déjà
+          inscrit dans un autre établissement, ou à celle d&rsquo;un professeur existant, seront
+          ignorés.
+        </p>
+
+        <p class="center">
+          En revanche, si une adresse électronique correspond à celle d&rsquo;un élève sans
+          établissement, celui-ci sera affecté au vôtre et son nom sera modifié.
+        </p>
+
+        <p class="center">
+          Si vous tentez d&rsquo;ajouter plusieurs élèves avec le même nom et sans adresse
+          électronique, seulement l&rsquo;un d&rsquo;entre eux sera pris en compte.
+        </p>
+
+        <p class="center">
+          Renseigner des informations associées à l&rsquo;adresse électronique d&rsquo;un élève de
+          l&rsquo;établissement n&rsquo;aura aucun impact.
+        </p>
+
+        <DataTable
+          headers={[
+            { value: "name", text: "Nom" },
+            { value: "email", text: "Adresse électronique" },
+            { value: "existingAccount", text: "Compte existant" },
+            { value: "schoolStatus", text: "Établissement" },
+            { value: "isTeacher", text: "Professeur" },
+            { value: "duplicate", text: "Doublon" },
+          ]}
+          items={summaryItems}
+          lineNumbering
+        >
+          <tr
+            slot="item"
+            let:item={{ name, email, existingAccount, schoolStatus, isTeacher, duplicate }}
+            let:lineNumber
+            class:highlight={schoolStatus !== "none" || isTeacher || duplicate}
+          >
+            <td class="center">{lineNumber}</td>
+            <td>{name}</td>
+            <td class="breakAll">{email}</td>
+            <td>
+              {#if existingAccount}
+                <Check />
+              {:else}
+                <Close />
+              {/if}
+            </td>
+            <td class="center">
+              {#if schoolStatus === "current"}
+                <span class="bad">Déjà présent(e)</span>
+              {:else if schoolStatus === "other"}
+                <span class="bad">Autre</span>
+              {:else}
+                Aucun
+              {/if}
+            </td>
+            <td>
+              {#if isTeacher}
+                <span class="bad"><Check /></span>
+              {:else}
+                <Close />
+              {/if}
+            </td>
+            <td>
+              {#if duplicate}
+                <span class="bad"><Check /></span>
+              {:else}
+                <Close />
+              {/if}
+            </td>
+          </tr>
+        </DataTable>
+
+        <p class="center">
+          Les lignes en fond gris requierent votre attention et seront ignorées si vous validez le
+          formulaire.
+        </p>
+      </div>
+    {/if}
+
+    <div class="cardActions">
+      <Button variant="text" --primary="var(--jester-red)" on:click={() => (modalOpen = false)}>
+        Annuler
+      </Button>
+      <!-- The first submit button will be used when pressing 'Enter' -->
+      <Button
+        variant="outlined"
+        formSubmit
+        on:click={() => {
+          forceAddStudents = false;
+        }}
+        {loading}
+        --primary="var(--princess-blue)"
+        --secondary="white"
+      >
+        Vérifier
+      </Button>
+      {#if summaryItems}
         <Button
-          variant="outlined"
+          variant="filled"
           formSubmit
           on:click={() => {
-            forceAddStudents = false;
+            forceAddStudents = true;
           }}
           {loading}
-          --primary="var(--princess-blue)"
+          --primary="var(--turmeric)"
           --secondary="white"
         >
-          Vérifier
+          Valider
         </Button>
-        {#if summaryItems}
-          <Button
-            variant="filled"
-            formSubmit
-            on:click={() => {
-              forceAddStudents = true;
-            }}
-            {loading}
-            --primary="var(--turmeric)"
-            --secondary="white"
-          >
-            Valider
-          </Button>
-        {/if}
-      </div>
-      <input type="hidden" name="force" value={forceAddStudents ? "yes" : "no"} />
-    </form>
-  </div>
+      {/if}
+    </div>
+    <input type="hidden" name="force" value={forceAddStudents ? "yes" : "no"} />
+  </form>
 </Modal>
 
 <style>

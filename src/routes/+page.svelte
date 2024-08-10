@@ -50,7 +50,7 @@
     Hello, <strong>world</strong>!</Button
   >
 
-  <div style="margin-top: 100vh; margin-left: 180px">
+  <div style="width: 600px; margin-left: 300px;">
     <Dialog width="300px">
       <TextField
         type="url"

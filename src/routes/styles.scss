@@ -53,6 +53,7 @@ $lg: 1904px;
   --toffee: #755139;
   --terrarium-moss: #616247;
   --galaxy-blue: #2a4b7c;
+  --sugar-almond: #935529;
 }
 
 $jesterRed: #9e1030;
@@ -72,6 +73,9 @@ body {
   // Chrome sets an 8px margin
   margin: 0;
   accent-color: $blue;
+  // Setting this overrides the initial containing block (the viewport)
+  // Extremely important for the Dialog component!!
+  position: relative;
 }
 
 svg {

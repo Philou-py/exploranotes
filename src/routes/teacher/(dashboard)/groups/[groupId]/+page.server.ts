@@ -8,7 +8,7 @@ const groupQuery = `
   query GroupQuery($userUid: string, $groupUid: string, $schoolUid: string) {
     schools(func: uid($schoolUid)) {
       groups @filter(uid($groupUid)) {
-        name
+        name: name@fr
         level
         admins: ~groups @filter(type(Teacher)) {
           uid
@@ -18,19 +18,19 @@ const groupQuery = `
           key: uid
           firstName
           lastName
-          subgroups: ~students(orderasc: name) @filter(type(Subgroup) and uid_in(group, $groupUid)) {
+          subgroups: ~students(orderasc: name@fr) @filter(type(Subgroup) and uid_in(group, $groupUid)) {
             uid
-            name
+            name: name@fr
             colour
           }
         }
-        subjects(orderasc: name) {
+        subjects(orderasc: name@fr) {
           uid
-          name
+          name: name@fr
         }
-        subgroups: ~group (orderasc: name) @filter(type(Subgroup)) {
+        subgroups: ~group (orderasc: name@fr) @filter(type(Subgroup)) {
           uid
-          name
+          name: name@fr
           colour
         }
       }
@@ -133,7 +133,7 @@ interface CheckSubgroupQuery {
 const delSubgroupQuery = `
   query DelSubgroupQuery($sgUid: string, $userUid: string) {
     subgroups(func: uid($sgUid)) {
-      name
+      name: name@fr
       group {
         uid
         admin: count(~groups @filter(uid($userUid)))
@@ -173,7 +173,7 @@ export const actions = {
     const mutation = new Mutation();
     mutation.setSetJson({
       "dgraph.type": "Subgroup",
-      name: subgroupName,
+      "name@fr": subgroupName,
       colour: `var(--${getRandomColour()})`,
       group: { uid: params.groupId },
     });

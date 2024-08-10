@@ -17,34 +17,32 @@
 </script>
 
 <Modal bind:show={$confirmation.open}>
-  <div class="card" style="padding: 1.5em;">
-    <header>
-      <h3 class="cardTitle">{$confirmation.message}</h3>
-    </header>
-    <p>{$confirmation.details}</p>
-    <div class="cardActions">
-      <Button
-        variant="outlined"
-        --primary="var(--jester-red)"
-        on:click={() => {
-          $confirmation.open = false;
-        }}
-      >
-        <Close slot="prepend" />
-        Annuler
-      </Button>
-      <Button
-        variant="elevated"
-        --primary="var(--princess-blue)"
-        --secondary="white"
-        on:click={() => {
-          $confirmation.onConfirm();
-          $confirmation.open = false;
-        }}
-      >
-        <ThumbUp slot="prepend" />
-        Bien sûr !
-      </Button>
-    </div>
+  <header>
+    <h3 class="cardTitle">{$confirmation.message}</h3>
+  </header>
+  <p>{$confirmation.details}</p>
+  <div class="cardActions">
+    <Button
+      variant="outlined"
+      --primary="var(--jester-red)"
+      on:click={() => {
+        $confirmation.open = false;
+      }}
+    >
+      <Close slot="prepend" />
+      Annuler
+    </Button>
+    <Button
+      variant="elevated"
+      --primary="var(--princess-blue)"
+      --secondary="white"
+      on:click={() => {
+        $confirmation.onConfirm();
+        $confirmation.open = false;
+      }}
+    >
+      <ThumbUp slot="prepend" />
+      Bien sûr !
+    </Button>
   </div>
 </Modal>

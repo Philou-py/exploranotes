@@ -8,6 +8,7 @@
   import Delete from "svelte-material-icons/DeleteOutline.svelte";
   import Plus from "svelte-material-icons/Plus.svelte";
   import FolderEdit from "svelte-material-icons/FolderEditOutline.svelte";
+  import Security from "svelte-material-icons/Security.svelte";
   import AccountEdit from "svelte-material-icons/AccountEdit.svelte";
   import AccountPlus from "svelte-material-icons/AccountMultiplePlusOutline.svelte";
   import ArrowRight from "svelte-material-icons/ArrowRightBoldHexagonOutline.svelte";
@@ -32,6 +33,7 @@
   import { darken } from "$lib/utilities";
   import { tick } from "svelte";
   import { page } from "$app/stores";
+  import ManageAccess from "./ManageAccess.svelte";
 
   export let data;
   let editStudent = { uid: "", firstName: "", lastName: "", email: "", hasAccount: false };
@@ -121,6 +123,7 @@
   <h1>Élèves</h1>
 
   <EditStudentModal student={editStudent} bind:modalOpen={editModalOpen} />
+  <ManageAccess groupDetails={data.mAGroup} />
 
   <div class="groupsTitle">
     <h2>Groupes</h2>
@@ -131,11 +134,11 @@
         --primary="var(--fruit-dove)"
         --secondary="white"
         on:click={() => {
-          const urlSearchParams = new URLSearchParams($page.url.searchParams.toString());
-          urlSearchParams.delete("editGroup");
-          if (!groupCreation) urlSearchParams.set("newGroup", "yes");
-          else urlSearchParams.delete("newGroup");
-          goto(`?${urlSearchParams.toString()}`, { replaceState: true });
+          const searchParams = new URLSearchParams($page.url.searchParams.toString());
+          searchParams.delete("editGroup");
+          if (!groupCreation) searchParams.set("newGroup", "yes");
+          else searchParams.delete("newGroup");
+          goto(`?${searchParams.toString()}`, { replaceState: true });
         }}
       >
         {#if groupCreation}
@@ -152,7 +155,6 @@
       { value: "name", text: "Nom" },
       { value: "nbStudents", text: "Élèves" },
       { value: "level", text: "Niveau" },
-      { value: "admins", text: "Administrateurs", noSorting: true },
       { value: "actions", text: "Actions", noSorting: true },
     ]}
     items={data.groups}
@@ -161,7 +163,7 @@
     emptyText="Aucun groupe n’a été créé pour cet établissement !"
     lineNumbering
   >
-    <tr slot="item" let:item={{ key, name, nbStudents, level, admins, isAdmin }} let:lineNumber>
+    <tr slot="item" let:item={{ key, name, nbStudents, level, isAdmin }} let:lineNumber>
       <td class="center">{lineNumber}</td>
       <td>
         <div style="display: flex; align-items: center; gap: 0.5em;">
@@ -180,23 +182,38 @@
       </td>
       <td class="center">{nbStudents}</td>
       <td class="center">{level}</td>
-      <td class="center">{admins ? admins.join(", ") : ""}</td>
-      <td class="center">
-        <Button
-          variant="text"
-          --primary="var(--turmeric)"
-          on:click={() => {
-            const urlSearchParams = new URLSearchParams($page.url.searchParams.toString());
-            urlSearchParams.delete("newGroup");
-            urlSearchParams.set("editGroup", key);
-            goto(`?${urlSearchParams.toString()}`, { replaceState: true });
-          }}
-          title="Modifier ce groupe"
-          disabled={!isAdmin}
-          icon
-        >
-          <FolderEdit />
-        </Button>
+      <td>
+        <div class="flexCenter">
+          <Button
+            variant="text"
+            --primary="var(--turmeric)"
+            on:click={() => {
+              const searchParams = new URLSearchParams($page.url.searchParams.toString());
+              searchParams.delete("newGroup");
+              searchParams.set("editGroup", key);
+              goto(`?${searchParams.toString()}`, { replaceState: true });
+            }}
+            title="Modifier ce groupe"
+            disabled={!isAdmin}
+            icon
+          >
+            <FolderEdit />
+          </Button>
+
+          <Button
+            variant="text"
+            --primary="var(--princess-blue)"
+            title="Modifier quels professeurs ont accès au groupe"
+            on:click={() => {
+              const searchParams = new URLSearchParams($page.url.searchParams.toString());
+              searchParams.set("manageAccess", key);
+              goto(`?${searchParams.toString()}`);
+            }}
+            icon
+          >
+            <Security />
+          </Button>
+        </div>
       </td>
     </tr>
   </DataTable>
@@ -214,7 +231,7 @@
               bind:value={data.groupPrefill.name}
               label="Nom du groupe"
               placeholder="Ex : Spé Maths Gr 7"
-              hint="Ce nom devrait être unique dans l'établissement."
+              hint="Ce nom devrait être unique dans l’établissement."
               maxlength={20}
               required
             >
@@ -277,7 +294,7 @@
               </div>
             {/each}
 
-            <div class="addSubject">
+            <div class="flexCenter">
               <Button
                 variant="outlined"
                 --primary={darken("var(--pepper-stem)", 20)}
@@ -616,10 +633,5 @@
   .subject {
     display: flex;
     align-items: center;
-  }
-
-  .addSubject {
-    display: flex;
-    justify-content: center;
   }
 </style>

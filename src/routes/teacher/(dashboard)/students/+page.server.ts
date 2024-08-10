@@ -33,9 +33,13 @@ interface StudentsQuery {
       nbStudents: number;
       level: string;
       primary: boolean;
-      admins?: { name: string }[];
       isAdmin: number;
     }[];
+  }[];
+  mAGroups: {
+    uid: string;
+    name: string;
+    admins: { key: string; name: string; email: string }[];
   }[];
 }
 
@@ -45,6 +49,9 @@ export const load = async ({ locals, depends, url }) => {
   const newGroup = url.searchParams.get("newGroup") === "yes";
   let groupToEdit = (!newGroup && url.searchParams.get("editGroup")) || "";
   if (groupToEdit !== "" && !groupToEdit.startsWith("0x")) groupToEdit = "";
+
+  let mAGroup = url.searchParams.get("manageAccess") || "";
+  if (!mAGroup.startsWith("0x")) mAGroup = "";
 
   const studentsQuery = `
     query StudentsQuery {
@@ -56,32 +63,40 @@ export const load = async ({ locals, depends, url }) => {
           name
           email
           hasAccount: verifiedEmail
-          primGroups: groups @filter(eq(primary, true)) (orderasc: name) {
+          primGroups: groups @filter(eq(primary, true)) (orderasc: name@fr) {
             uid
-            name
+            name: name@fr
             colour
           }
-          otherGroups: groups @filter(eq(primary, false)) (orderasc: name) {
-            name
+          otherGroups: groups @filter(eq(primary, false)) (orderasc: name@fr) {
+            name: name@fr
             colour
           }
           selected: count(groups @filter(uid(${groupToEdit})))
         }
         groups {
           key: uid
-          name
+          name: name@fr
           nbStudents: count(~groups @filter(type(Student)))
           level
           primary
-          admins: ~groups @filter(type(Teacher)) (orderasc: name) { name }
           isAdmin: count(~groups @filter(type(Teacher) and uid(${locals.currentUser.uid})))
+        }
+      }
+      mAGroups(func: uid(${mAGroup})) {
+        uid
+        name: name@fr
+        admins: ~groups @filter(type(Teacher)) (orderasc: name) {
+          key: uid
+          name
+          email
         }
       }
     }
   `;
 
   const response = await db.newTxn().query(studentsQuery);
-  const { schools }: StudentsQuery = response.getJson();
+  const { schools, mAGroups }: StudentsQuery = response.getJson();
 
   let groupPrefill = { name: "", level: "", primary: false };
   const targetGroup = schools[0]?.groups.find((gr) => gr.key === groupToEdit && gr.isAdmin === 1);
@@ -109,11 +124,7 @@ export const load = async ({ locals, depends, url }) => {
 
   return {
     students,
-    groups:
-      schools[0]?.groups.map((gr) => ({
-        ...gr,
-        admins: gr.admins?.map((teach) => teach.name) || [],
-      })) || [],
+    groups: schools[0]?.groups || [],
     groupsItems: [
       ["", "-- Pas de tri --"] as [string, string],
       ...(schools[0]?.groups.map((gr) => [gr.key, gr.name] as [string, string]) || []),
@@ -121,6 +132,7 @@ export const load = async ({ locals, depends, url }) => {
     groupToEdit,
     newGroup,
     groupPrefill,
+    mAGroup: mAGroups[0] || { uid: "", name: "", admins: [] },
   };
 };
 
@@ -201,6 +213,55 @@ const NewGroup = z.object({
 interface CreateGroupQuery {
   scCheck: { allInSchool: boolean }[];
   grCheck: { isAdmin: boolean }[];
+}
+
+const NewAdmin = z.object({
+  groupUid: z.string().regex(/0x[a-f0-9]+/),
+  email: z.string().email(),
+});
+
+const addAdminQuery = `
+  query AddAdminQuery($schoolUid: string, $email: string) {
+    schools(func: uid($schoolUid)) {
+      teachers: ~school @filter(type(Teacher) and eq(email, $email)) {
+        uid
+        name
+      }
+    }
+  }
+`;
+
+interface AddAdminQuery {
+  schools: {
+    teachers: { uid: string; name: string }[];
+  }[];
+}
+
+const OldAdmin = z.object({
+  groupUid: z.string().regex(/0x[a-f0-9]+/),
+  teacherUid: z.string().regex(/0x[a-f0-9]+/),
+});
+
+const remAdminQuery = `
+  query RemAdminQuery($schoolUid: string, $groupUid: string, $teacherUid: string) {
+    schools(func: uid($schoolUid)) {
+      groups @filter(uid($groupUid)) {
+        teachers: ~groups @filter(type(Teacher) and uid($teacherUid)) {
+          name
+        }
+        nbAdmins: count(~groups @filter(type(Teacher)))
+      }
+    }
+  }
+`;
+
+interface RemAdminQuery {
+  schools: {
+    groups: {
+      teachers?: { name: string }[];
+      nbAdmins: number;
+    }[];
+  }[];
 }
 
 export const actions = {
@@ -549,7 +610,7 @@ export const actions = {
       .filter(([key, _]) => key.startsWith("sub"))
       .map(([_, val]) => ({
         "dgraph.type": "Subject",
-        name: val,
+        "name@fr": val,
       }));
 
     const txn = db.newTxn();
@@ -560,7 +621,7 @@ export const actions = {
       {
         uid: groupUid,
         "dgraph.type": "Group",
-        name: newGroup.name,
+        "name@fr": newGroup.name,
         subjects: newSubjects,
         level: newGroup.level,
         primary: newGroup.primary === "yes",
@@ -593,5 +654,80 @@ export const actions = {
       message: `Le groupe ${newGroup.name} a bien été ${newGroup.groupToEdit ? "modifié" : "créé"} !`,
     };
     return actionReturn;
+  },
+
+  addAdmin: async ({ request, locals }) => {
+    const formData = await request.formData();
+
+    const { success, data: newAdmin } = NewAdmin.safeParse({
+      groupUid: formData.get("groupUid"),
+      email: formData.get("email"),
+    });
+    if (!success) return validationFail();
+
+    const queryRes = await db.newTxn().queryWithVars(addAdminQuery, {
+      $schoolUid: locals.currentUser.school.uid,
+      $email: newAdmin.email,
+    });
+    const { schools }: AddAdminQuery = queryRes.getJson();
+
+    if (schools.length === 0)
+      return fail(400, { message: "Ce professeur n’existe pas dans cet établissement !" });
+    const teacher = schools[0].teachers[0];
+
+    const txn = db.newTxn();
+    const mutation = new Mutation();
+    mutation.setSetJson({
+      uid: teacher.uid,
+      groups: { uid: newAdmin.groupUid },
+    });
+
+    await txn.mutate(mutation);
+    await txn.commit();
+
+    return { message: `${teacher.name} est maintenant un administrateur !` };
+  },
+
+  removeAdmin: async ({ request, locals }) => {
+    const formData = await request.formData();
+
+    const { success, data: oldAdmin } = OldAdmin.safeParse({
+      groupUid: formData.get("groupUid"),
+      teacherUid: formData.get("teacherUid"),
+    });
+    if (!success) return validationFail();
+
+    if (oldAdmin.teacherUid === locals.currentUser.uid)
+      return fail(400, {
+        message: "Vous ne pouvez pas vous retirer vous-même le rôle d’administrateur !",
+      });
+
+    const queryRes = await db.newTxn().queryWithVars(remAdminQuery, {
+      $schoolUid: locals.currentUser.school.uid,
+      $teacherUid: oldAdmin.teacherUid,
+      $groupUid: oldAdmin.groupUid,
+    });
+    const { schools }: RemAdminQuery = queryRes.getJson();
+
+    if (schools.length === 0)
+      return fail(400, { message: "Ce groupe n’existe pas dans cet établissement !" });
+    if (!schools[0].groups[0].teachers)
+      return fail(400, { message: "Ce professeur n’est pas un administrateur de ce groupe !" });
+    if (schools[0].groups[0].nbAdmins === 1)
+      return fail(400, { message: "Vous ne pouvez pas supprimer le dernier administrateur !" });
+
+    const txn = db.newTxn();
+    const mutation = new Mutation();
+    mutation.setDeleteJson({
+      uid: oldAdmin.teacherUid,
+      groups: { uid: oldAdmin.groupUid },
+    });
+
+    await txn.mutate(mutation);
+    await txn.commit();
+
+    return {
+      message: `${schools[0].groups[0].teachers[0].name} n’est plus administrateur de ce groupe !`,
+    };
   },
 };

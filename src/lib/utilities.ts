@@ -1,4 +1,6 @@
-import { fail } from "@sveltejs/kit";
+import { applyAction } from "$app/forms";
+import { fail, type SubmitFunction } from "@sveltejs/kit";
+import { snackBars } from "components/SnackBars.svelte";
 
 export const lighten = (colour: string, percent: number) =>
   `color-mix(in srgb, ${colour}, white ${percent}%)`;
@@ -34,6 +36,7 @@ export const colours = [
   "toffee",
   "terrarium-moss",
   "galaxy-blue",
+  "sugar-almond",
 ];
 
 export const alternateColours = new Map([
@@ -61,6 +64,34 @@ export const alternateColours = new Map([
   ["var(--toffee)", "white"],
   ["var(--terrarium-moss)", "white"],
   ["var(--galaxy-blue)", "white"],
+  ["var(--sugar-almond)", "white"],
 ]);
 
 export const getRandomColour = () => colours[Math.floor(Math.random() * colours.length)];
+
+export const handleSubmit = (
+  setLoading: (start: boolean) => any,
+  onSuccess?: () => any,
+  beforeSubmit?: () => any,
+): ReturnType<SubmitFunction> => {
+  setLoading(true);
+  if (beforeSubmit) beforeSubmit();
+
+  return async ({ result }) => {
+    switch (result.type) {
+      case "success":
+        if (onSuccess) onSuccess();
+        snackBars.haveASnack(result.data!.message);
+        break;
+      case "failure":
+        snackBars.haveASnack(result.data!.message, "error");
+        break;
+      case "error":
+        snackBars.haveASnack(result.error.message, "error");
+        break;
+      default:
+        await applyAction(result);
+    }
+    setLoading(false);
+  };
+};
